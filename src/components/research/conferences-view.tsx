@@ -1,17 +1,10 @@
 'use client'
 
 import { useLanguage } from '@/lib/i18n'
-
-interface Conference {
-    id: string
-    title: string
-    authors?: string
-    year: number | string
-    meta?: string
-}
+import { ResearchItem } from '@/lib/data/research'
 
 interface ConferencesViewProps {
-    conferencesByYear: Map<number, Conference[]>
+    conferencesByYear: Map<number, ResearchItem[]>
     years: number[]
 }
 
