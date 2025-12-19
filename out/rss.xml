@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+  <channel>
+    <title>My Blog</title>
+    <link>https://your-domain.com</link>
+    <description>Latest blog posts</description>
+    <language>en-us</language>
+    <item>
+        <title>Mastering CSS Grid Layout</title>
+        <description>Dive deep into CSS Grid and learn how to create complex layouts with ease.</description>
+        <link>https://your-domain.com/posts/mastering-css-grid-layout</link>
+        <pubDate>Tue, 28 Jan 2025 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+        <title>Optimizing Node.js Performance</title>
+        <description>Practical tips and techniques to improve your Node.js application performance.</description>
+        <link>https://your-domain.com/posts/optimizing-nodejs-performance</link>
+        <pubDate>Sat, 25 Jan 2025 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+        <title>TypeScript Best Practices for 2025</title>
+        <description>Learn the essential TypeScript best practices that will make your code more maintainable and type-safe.</description>
+        <link>https://your-domain.com/posts/typescript-best-practices-2025</link>
+        <pubDate>Wed, 22 Jan 2025 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+        <title>Web Accessibility Fundamentals</title>
+        <description>Essential accessibility practices every web developer should know to build inclusive web applications.</description>
+        <link>https://your-domain.com/posts/web-accessibility-fundamentals</link>
+        <pubDate>Mon, 20 Jan 2025 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+        <title>Understanding React State Management</title>
+        <description>Learn React state management fundamentals with examples and explore when to use Context API vs external libraries.</description>
+        <link>https://your-domain.com/posts/understanding-react-state-management</link>
+        <pubDate>Sat, 18 Jan 2025 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+        <title>Getting Started with React Hooks</title>
+        <description>A comprehensive guide to understanding and using React Hooks in your applications.</description>
+        <link>https://your-domain.com/posts/getting-started-with-react-hooks</link>
+        <pubDate>Wed, 15 Jan 2025 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+        <title>Creating Smooth CSS Animations</title>
+        <description>Master CSS animations and transitions to create engaging user experiences with practical examples.</description>
+        <link>https://your-domain.com/posts/creating-smooth-css-animations</link>
+        <pubDate>Sun, 12 Jan 2025 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+        <title>Modern Form Validation Techniques</title>
+        <description>Learn how to implement robust form validation with real-time feedback and better user experience.</description>
+        <link>https://your-domain.com/posts/modern-form-validation-techniques</link>
+        <pubDate>Wed, 08 Jan 2025 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+        <title>Implementing Dark Mode in React</title>
+        <description>A comprehensive guide to implementing dark mode with system preferences detection and persistent user choice.</description>
+        <link>https://your-domain.com/posts/implementing-dark-mode-react</link>
+        <pubDate>Sun, 05 Jan 2025 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+        <title>Data Visualization with React</title>
+        <description>Learn how to create beautiful, interactive data visualizations in React with practical examples and best practices.</description>
+        <link>https://your-domain.com/posts/data-visualization-with-react</link>
+        <pubDate>Thu, 02 Jan 2025 00:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

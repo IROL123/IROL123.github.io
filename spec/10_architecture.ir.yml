@@ -1,0 +1,285 @@
+# =====================================================================
+# 10_architecture.ir.yml
+# =====================================================================
+# Architecture Definition for `lab-site`
+#
+# Purpose:
+#   - Define the static site generation pipeline and runtime components.
+#   - Identify key modules for content processing and rendering.
+#   - Serve as the blueprint for implementation planning.
+#
+# Context:
+#   - Next.js + Nextra based system.
+#   - Deployed to GitHub Pages.
+#   - Content-driven (People, Papers, Projects).
+# =====================================================================
+
+metadata:
+  system_name: "lab-site"
+  version: 1.0.0
+  description: >
+    Architecture for a static-first research lab website using Next.js,
+    Nextra, and structured MDX content.
+  last_updated_by: Gemini CLI
+  related_specs:
+    - "01_constraints.md"
+    - "11_interfaces.ir.yml"
+
+# -------------------------------------------------------------------
+# 1. SYSTEM OVERVIEW
+# -------------------------------------------------------------------
+
+system:
+  purpose: >
+    To serve as the public face of the research lab, providing an up-to-date,
+    fast, and accessible repository of people, publications, and projects.
+  goals:
+    - "Automated content validation (no broken profiles/papers)."
+    - "Low maintenance (edit MDX -> git push -> deploy)."
+    - "High performance (static HTML, fast load times)."
+    - "Canonical data structure for research outputs."
+  non_goals:
+    - "Real-time user accounts or login."
+    - "Dynamic database backend."
+    - "Comment systems hosted internally (use 3rd party if needed)."
+
+# -------------------------------------------------------------------
+# 2. LAYERS
+# -------------------------------------------------------------------
+
+layers:
+  - id: content_layer
+    name: Content Layer
+    description: >
+      The raw data source residing in the file system (`content/`).
+      Consists of MDX files with YAML frontmatter.
+    responsibilities:
+      - "Storage of People, Papers, Projects, Notices."
+      - "Versioning via Git."
+
+  - id: schema_index_layer
+    name: Schema & Indexing Layer
+    description: >
+      Build-time logic to read, validate, and index the content.
+      This layer ensures data integrity before rendering.
+    responsibilities:
+      - "Validate MDX frontmatter against `11_interfaces`."
+      - "Generate derived indices (e.g., list of papers by year, tags)."
+      - "Fail build on validation errors."
+
+  - id: ui_component_layer
+    name: UI Component Layer
+    description: >
+      React components responsible for visual presentation.
+      Includes atomic UI elements and composite blocks.
+    responsibilities:
+      - "Render data passed from pages."
+      - "Provide interactive elements (search, filters) via client-side logic."
+      - "Maintain consistent design system."
+
+  - id: routing_seo_layer
+    name: Routing & SEO Layer
+    description: >
+      Next.js App Router (or Pages) structure defining the URL hierarchy.
+      Handles metadata injection and sitemap generation.
+    responsibilities:
+      - "Map URL routes to page templates."
+      - "Inject OpenGraph/Twitter card metadata."
+      - "Generate `sitemap.xml` and `robots.txt`."
+
+  - id: build_deploy_layer
+    name: Build & Deploy Layer
+    description: >
+      The CI/CD pipeline and static export process.
+    responsibilities:
+      - "Execute `next build` and `next export`."
+      - "Run linters and tests."
+      - "Deploy artifacts to GitHub Pages."
+
+# -------------------------------------------------------------------
+# 3. MODULES
+# -------------------------------------------------------------------
+
+modules:
+  - id: content_loader
+    name: ContentLoader
+    layer: schema_index_layer
+    description: >
+      Utility library to read MDX files from the file system.
+    responsibilities:
+      - "Traverse `content/` directories."
+      - "Parse frontmatter (YAML) and content body."
+    inputs:
+      - type: file_system
+        name: raw_content_files
+        description: "MDX files in content directory."
+    outputs:
+      - type: object
+        name: raw_content_objects
+        description: "JavaScript objects with metadata and content."
+    depends_on: []
+    language: "TypeScript (Node.js)"
+
+  - id: schema_validator
+    name: SchemaValidator
+    layer: schema_index_layer
+    description: >
+      Enforces schemas defined in `11_interfaces` using Zod (or Valibot).
+    responsibilities:
+      - "Validate structure of `raw_content_objects`."
+      - "Throw descriptive errors for missing/invalid fields."
+    inputs:
+      - type: object
+        name: raw_content_objects
+    outputs:
+      - type: object
+        name: validated_entities
+        schema: "Entity Types (Person, Paper, etc.)"
+    depends_on:
+      - content_loader
+
+  - id: index_builder
+    name: IndexBuilder
+    layer: schema_index_layer
+    description: >
+      Aggregates validated entities into lists and maps for quick access.
+    responsibilities:
+      - "Group papers by year."
+      - "Collect all unique tags."
+      - "Map authors to their papers."
+    inputs:
+      - type: object
+        name: validated_entities
+    outputs:
+      - type: object
+        name: derived_indexes
+        description: "Lookup tables for rendering lists."
+    depends_on:
+      - schema_validator
+
+  - id: page_renderer
+    name: PageRenderer (Next.js Pages)
+    layer: routing_seo_layer
+    description: >
+      The set of Next.js page components (e.g., `app/people/page.tsx`).
+    responsibilities:
+      - "Fetch data via `IndexBuilder` (at build time)."
+      - "Pass data to UI components."
+      - "Define page-specific metadata."
+    inputs:
+      - type: object
+        name: validated_entities
+      - type: object
+        name: derived_indexes
+    outputs:
+      - type: html
+        name: static_html_pages
+    depends_on:
+      - index_builder
+      - ui_component_layer
+
+  - id: search_indexer (Optional)
+    name: ClientSearchIndexer
+    layer: build_deploy_layer
+    description: >
+      Generates a search index (e.g., FlexSearch) JSON file for client-side search.
+    responsibilities:
+      - "Serialize searchable text from entities."
+      - "Write `search-index.json` to public assets."
+    inputs:
+      - type: object
+        name: validated_entities
+    outputs:
+      - type: file
+        name: search_index_json
+    depends_on:
+      - schema_validator
+
+  - id: deploy_pipeline
+    name: DeployPipeline (GH Actions)
+    layer: build_deploy_layer
+    description: >
+      GitHub Actions workflow for CI/CD.
+    responsibilities:
+      - "Install dependencies."
+      - "Run tests and linting."
+      - "Build static site."
+      - "Upload to GitHub Pages."
+    inputs:
+      - type: git_repo
+        name: source_code
+    outputs:
+      - type: http_endpoint
+        name: live_website
+    depends_on:
+      - page_renderer
+
+# -------------------------------------------------------------------
+# 4. WORKFLOWS
+# -------------------------------------------------------------------
+
+workflows:
+  - id: wf_build_process
+    name: Static Site Build
+    description: "The sequence of operations during `next build`."
+    steps:
+      - order: 1
+        module: content_loader
+        action: "Read all MDX files."
+      - order: 2
+        module: schema_validator
+        action: "Validate frontmatter against schemas. Fail if invalid."
+      - order: 3
+        module: index_builder
+        action: "Create sorted lists (Papers by Year, People by Role)."
+      - order: 4
+        module: page_renderer
+        action: "Generate HTML for every route."
+      - order: 5
+        module: search_indexer
+        action: "Generate client-side search index (optional)."
+
+  - id: wf_content_update
+    name: Content Update Cycle
+    description: "How a user adds a new paper or person."
+    steps:
+      - order: 1
+        actor: "User"
+        action: "Creates `content/papers/new-paper.mdx`."
+      - order: 2
+        actor: "User"
+        action: "Runs `npm run dev` to preview."
+      - order: 3
+        module: schema_validator
+        action: "Checks file immediately in dev mode."
+      - order: 4
+        actor: "User"
+        action: "Commits and pushes."
+      - order: 5
+        module: deploy_pipeline
+        action: "Builds and deploys to production."
+
+# -------------------------------------------------------------------
+# 5. CROSS-CUTTING CONCERNS
+# -------------------------------------------------------------------
+
+cross_cutting:
+  error_handling:
+    strategy: "Fail Build on Data Error"
+    details: "If a required field is missing, the build process must exit with code 1 and log the specific file/field."
+  
+  theming:
+    strategy: "Nextra Theme + Custom Override"
+    details: "Use standard Nextra layout but inject custom components for landing page and entity lists."
+
+  accessibility:
+    strategy: "Semantic HTML"
+    details: "All components must use proper ARIA roles and semantic tags."
+
+# -------------------------------------------------------------------
+# 6. OPEN QUESTIONS
+# -------------------------------------------------------------------
+
+open_questions:
+  - "Should we use a specialized CMS-layer library (like Contentlayer or Velite) or a simple custom script?"
+  - "Velite is modern and type-safe, Contentlayer is unmaintained. Recommendation: Velite or simple `gray-matter` + Zod."

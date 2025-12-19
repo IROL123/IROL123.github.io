@@ -1,0 +1,181 @@
+metadata:
+  system_name: "lab-site"
+  status_version: "1.0.0"
+  last_scan: "2025-12-19T00:00:00Z"
+  last_updated_by: "Codex Max"
+  based_on_architecture_version: "1.0.0"
+  based_on_impl_plan_version: "1.0.0"
+  notes:
+    - "This file describes current repo reality (baseline snapshot), not the target design."
+    - "Repo currently contains a working Nextra blog starter; lab-site entity pipeline is not implemented yet."
+
+status_enums:
+  implementation_status:
+    - name: not_started
+      description: "No code exists yet (or only stubs)."
+    - name: in_progress
+      description: "Some code exists, not complete or not aligned to the latest IR."
+    - name: implemented
+      description: "Implemented and stable for current requirements."
+    - name: needs_refactor
+      description: "Works but requires cleanup or redesign."
+    - name: deprecated
+      description: "Do not extend; slated for removal."
+    - name: broken
+      description: "Known to fail or misbehave."
+
+  test_status:
+    - name: none
+      description: "No tests exist yet."
+    - name: partial
+      description: "Some tests exist but incomplete."
+    - name: full
+      description: "Tests cover main flows."
+    - name: failing
+      description: "Tests exist but currently failing."
+
+  documentation_status:
+    - name: none
+      description: "No documentation."
+    - name: minimal
+      description: "Basic docs exist."
+    - name: adequate
+      description: "Reasonably documented."
+    - name: excellent
+      description: "Well documented with examples."
+
+global_summary:
+  overall_health: "IN_PROGRESS"
+  modules_total: 6
+  modules_implemented: 1
+  modules_in_progress: 3
+  modules_not_started: 2
+  key_risks:
+    - "Static export + GitHub Pages basePath configuration not yet present (spec/01_constraints requires it)."
+    - "No schema validation tooling yet; invalid content would not fail the build."
+    - "Content currently uses blog starter layout (`content/posts/*`) rather than canonical entities."
+    - "No CI/CD workflows exist yet (no `.github/workflows/*`)."
+  recommendations:
+    - "Implement `schema_validator` + `validate:content` first, then migrate content directories."
+    - "Add GitHub Pages static export config and CI smoke tests before public launch."
+
+modules:
+  - module_id: "content_loader"
+    name: "ContentLoader (current: blog-post loader)"
+    layer: "schema_index_layer"
+    implementation_status: in_progress
+    test_status: none
+    documentation_status: minimal
+    summary: >
+      There is existing build-time filesystem logic to read blog posts under `content/posts/`,
+      but it is not yet generalized to lab-site entities (people/papers/projects/notices/datasets).
+    files:
+      - path: "src/lib/get-posts.ts"
+        kind: "module"
+        status: in_progress
+        notes:
+          - "Reads/parses MDX posts (starter-specific)."
+      - path: "src/lib/get-tags.ts"
+        kind: "module"
+        status: in_progress
+        notes:
+          - "Tag extraction/indexing for posts."
+
+  - module_id: "schema_validator"
+    name: "SchemaValidator"
+    layer: "schema_index_layer"
+    implementation_status: not_started
+    test_status: none
+    documentation_status: none
+    summary: "No entity schema validators exist yet for spec/11_interfaces.ir.yml."
+    files: []
+
+  - module_id: "index_builder"
+    name: "IndexBuilder (current: post tags)"
+    layer: "schema_index_layer"
+    implementation_status: in_progress
+    test_status: none
+    documentation_status: minimal
+    summary: >
+      Basic derived indexing exists for the blog starter (tags across posts).
+      Lab-site indexes (papers by year, authors->papers, people by role, etc.) are not implemented.
+    files:
+      - path: "src/lib/get-tags.ts"
+        kind: "module"
+        status: in_progress
+        notes:
+          - "Starter-specific; will be replaced or generalized."
+
+  - module_id: "page_renderer"
+    name: "PageRenderer (Nextra App Router)"
+    layer: "routing_seo_layer"
+    implementation_status: in_progress
+    test_status: none
+    documentation_status: minimal
+    summary: >
+      Nextra App Router is wired and renders MDX content, but entity index pages
+      (/people, /papers, /projects, /notices, /datasets) do not exist yet.
+    files:
+      - path: "src/app/[[...mdxPath]]/page.tsx"
+        kind: "route"
+        status: implemented
+      - path: "src/app/layout.tsx"
+        kind: "layout"
+        status: implemented
+      - path: "src/app/sitemap.ts"
+        kind: "route"
+        status: implemented
+      - path: "src/app/robots.ts"
+        kind: "route"
+        status: implemented
+      - path: "src/app/rss.xml/route.ts"
+        kind: "route"
+        status: implemented
+      - path: "src/app/_meta.global.ts"
+        kind: "config"
+        status: implemented
+      - path: "content/index.mdx"
+        kind: "content_page"
+        status: implemented
+
+  - module_id: "search_indexer (Optional)"
+    name: "ClientSearchIndexer (Pagefind)"
+    layer: "build_deploy_layer"
+    implementation_status: implemented
+    test_status: none
+    documentation_status: minimal
+    summary: >
+      Pagefind is configured via `package.json` postbuild to generate search assets.
+      This is currently tied to the starter output structure and may need adjustment
+      once static export (`out/`) is enabled.
+    files:
+      - path: "package.json"
+        kind: "build_manifest"
+        status: implemented
+        notes:
+          - "Contains `postbuild: pagefind ...`."
+
+  - module_id: "deploy_pipeline"
+    name: "DeployPipeline (GitHub Actions)"
+    layer: "build_deploy_layer"
+    implementation_status: not_started
+    test_status: none
+    documentation_status: none
+    summary: "No GitHub Actions workflow exists yet for CI or GitHub Pages deployment."
+    files: []
+
+baseline_notes:
+  current_top_level_dirs:
+    - "src/"
+    - "content/"
+    - "public/"
+    - "spec/"
+  current_content_dirs:
+    - "content/posts/"
+  missing_expected_dirs:
+    - "content/people/"
+    - "content/papers/"
+    - "content/projects/"
+    - "content/notices/"
+    - "content/datasets/"
+

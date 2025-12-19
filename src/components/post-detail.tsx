@@ -21,7 +21,7 @@ export function PostDetail({metadata, children}: Props) {
                     Back to Posts
                 </Link>
                 <IconPoint className="w-3"/>
-                <div>{formatDate(metadata.date)}</div>
+                <div>{metadata.date ? formatDate(metadata.date) : ''}</div>
             </div>
 
             {children}

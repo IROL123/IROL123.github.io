@@ -1,21 +1,22 @@
-import {Head} from 'nextra/components'
+import { Head } from 'nextra/components'
 import 'nextra-theme-blog/style.css'
 import '@/styles/globals.css'
 import CustomFooter from "@/components/custom-footer";
 import CustomHeader from "@/components/custom-header";
-import {Metadata} from "next";
-import {Layout} from "nextra-theme-blog";
-import {Inter} from 'next/font/google';
+import { FloatingNav } from "@/components/floating-nav";
+import { Metadata } from "next";
+import { Layout } from "nextra-theme-blog";
+import { Inter } from 'next/font/google';
 
 export const metadata: Metadata = {
-    title: 'Nextra Blog'
+    title: 'IROL - Intelligent Robotics Lab'
 }
 
 const bodyFont = Inter({
     subsets: ['latin', 'vietnamese'],
 })
 
-export default async function RootLayout({children}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html
             // Not required, but good for SEO
@@ -27,16 +28,17 @@ export default async function RootLayout({children}) {
 
             className={bodyFont.className}
         >
-        <Head backgroundColor={{dark: '#15120d', light: '#faf5e9'}}/>
-        <body className="min-h-screen">
-        <Layout>
-            <CustomHeader/>
+            <Head backgroundColor={{ dark: '#15120d', light: '#faf5e9' }} />
+            <body className="min-h-screen">
+                <Layout>
+                    <CustomHeader />
 
-            {children}
+                    {children}
 
-            <CustomFooter/>
-        </Layout>
-        </body>
+                    <CustomFooter />
+                </Layout>
+                <FloatingNav />
+            </body>
         </html>
     )
 }

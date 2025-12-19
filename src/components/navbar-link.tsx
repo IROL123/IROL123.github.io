@@ -10,16 +10,16 @@ type Props = {
     children: React.ReactNode;
 };
 
-export function NavbarLink(props: Props) {
+export function NavbarLink({href, target = "", children}: Props) {
     const pathname = useFSRoute();
-    const {href, target = ""} = props;
     return (
         <Link
             href={href}
             className="no-underline hover:underline focus:underline aria-[current]:font-bold"
             aria-current={href === pathname || undefined}
             target={target}
-            {...props}
-        />
+        >
+            {children}
+        </Link>
     )
 }

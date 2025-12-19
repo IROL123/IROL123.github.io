@@ -1,0 +1,237 @@
+# =====================================================================
+# 21_test_plan.ir.yml
+# =====================================================================
+# Smoke Test Plan IR for `lab-site` (Next.js + Nextra)
+#
+# Definition: "Is the site basically alive?"
+# - build succeeds
+# - content schema validation succeeds
+# - internal links are sane
+# - a minimal content-to-index-to-page workflow works
+# =====================================================================
+
+metadata:
+  system_name: "lab-site"
+  plan_version: "1.0.0"
+  last_updated: "2025-12-19"
+  last_updated_by: "Codex Max"
+  based_on_architecture_version: "1.0.0"
+  based_on_impl_plan_version: "1.0.0"
+  notes:
+    - "Smoke tests must remain < 10 minutes total on GitHub Actions."
+    - "Prefer offline/deterministic checks; avoid external network where possible."
+
+# -------------------------------------------------------------------
+# 1. PHILOSOPHY & SCOPE
+# -------------------------------------------------------------------
+
+philosophy:
+  definition: >
+    Smoke tests are a minimal set of automated checks that verify whether the
+    static site can be built, validated, and served without obvious breakage.
+  goals:
+    - "Catch broken builds (Next/Nextra) quickly."
+    - "Fail fast on schema-invalid content."
+    - "Prevent obvious navigation regressions (broken internal links)."
+    - "Verify one end-to-end content workflow (add a paper -> appears in /papers)."
+  non_goals:
+    - "Exhaustive UI testing or deep unit coverage."
+    - "Full external link verification on every commit."
+
+scope:
+  included:
+    - "Next.js/Nextra build + static export output sanity."
+    - "Schema validation for entities in spec/11_interfaces.ir.yml."
+    - "Internal link checking on generated HTML."
+    - "Minimal workflow smoke: content -> index -> rendered list page."
+  excluded:
+    - "External link checking as a hard gate (warn-only by default)."
+    - "Performance benchmarks."
+
+# -------------------------------------------------------------------
+# 2. ENVIRONMENTS & EXECUTION POLICIES
+# -------------------------------------------------------------------
+
+environments:
+  - id: dev_local
+    description: "Developer machine (macOS/Linux)."
+    requirements:
+      - "Node.js (latest LTS) + Corepack."
+      - "pnpm install works."
+    trigger:
+      - "Pre-PR and before release tags (recommended)."
+
+  - id: ci_github_actions
+    description: "GitHub Actions runner."
+    requirements:
+      - "Node.js (latest LTS) + Corepack."
+      - "No secrets required."
+    trigger:
+      - "Required on PRs and pushes to main."
+
+execution_policies:
+  max_total_duration_minutes: 10
+  parallelization_allowed: true
+  must_be_automated: true
+  manual_steps_allowed: false
+
+# -------------------------------------------------------------------
+# 3. SMOKE TEST CASES (BY MODULE)
+# -------------------------------------------------------------------
+
+module_smoke_matrix:
+  - module_id: "page_renderer"
+    importance: "critical"
+    smoke_tests:
+      - id: "SMK_SITE_001"
+        name: "Dependencies install + build succeeds"
+        level: "smoke"
+        environment_ids: ["ci_github_actions", "dev_local"]
+        description: >
+          Install dependencies from lockfile and run the production build.
+          This is the primary "site is alive" check.
+        automation:
+          command: "corepack enable && pnpm install --frozen-lockfile && pnpm run build"
+          ci_job: "smoke_build"
+        expected:
+          - "`pnpm install --frozen-lockfile` succeeds."
+          - "`pnpm run build` succeeds."
+
+      - id: "SMK_LINK_001"
+        name: "Internal link check (configurable strictness)"
+        level: "smoke"
+        environment_ids: ["ci_github_actions"]
+        description: >
+          Build/export the site and scan the generated HTML for broken INTERNAL links.
+          External links are warn-only or skipped by default.
+        preconditions:
+          - "Static output exists (typically `out/`)."
+        automation:
+          command: "pnpm run linkcheck"
+          ci_job: "smoke_linkcheck"
+        expected:
+          - "No broken internal links."
+        configuration:
+          strictness:
+            internal: "fail"
+            external: "warn"
+
+  - module_id: "content_loader"
+    importance: "critical"
+    smoke_tests:
+      - id: "SMK_SCHEMA_001"
+        name: "Content schema validation passes"
+        level: "smoke"
+        environment_ids: ["ci_github_actions", "dev_local"]
+        description: >
+          Parse and validate all MDX entity entries under `content/<entity>/` against the canonical
+          schemas in spec/11_interfaces.ir.yml, validating the combined object (frontmatter + any
+          MDX-body-derived markdown fields like Project.content / Notice.content / Dataset.description).
+        automation:
+          command: "pnpm run validate:content"
+          ci_job: "smoke_schema"
+        expected:
+          - "All entity files pass validation."
+          - "Failures include file path + field name."
+
+  - module_id: "schema_validator"
+    importance: "critical"
+    smoke_tests:
+      - id: "SMK_SCHEMA_001"
+        name: "Content schema validation passes"
+        level: "smoke"
+        environment_ids: ["ci_github_actions", "dev_local"]
+        description: "Same smoke test; this module owns the validator implementation."
+        automation:
+          command: "pnpm run validate:content"
+          ci_job: "smoke_schema"
+        expected:
+          - "All entity files pass validation."
+
+  - module_id: "index_builder"
+    importance: "high"
+    smoke_tests:
+      - id: "WF_SMK_001"
+        name: "Workflow: add a sample paper -> appears in /papers"
+        level: "smoke"
+        environment_ids: ["ci_github_actions"]
+        description: >
+          Add one known-valid sample paper entry (fixture) and verify the /papers
+          index page includes it after build/export. Implement as a snapshot or
+          string-contains assertion against generated `out/papers/index.html`.
+        automation:
+          command: "pnpm run test:smoke -- --filter WF_SMK_001"
+          ci_job: "smoke_workflow"
+        expected:
+          - "Generated /papers index contains the fixture paper title."
+          - "No schema validation errors."
+
+  - module_id: "search_indexer (Optional)"
+    importance: "medium"
+    smoke_tests:
+      - id: "SMK_SEARCH_001"
+        name: "Search assets generated (Pagefind)"
+        level: "smoke"
+        environment_ids: ["ci_github_actions"]
+        description: >
+          If Pagefind is enabled, ensure `public/_pagefind/` is generated after build.
+          This is a lightweight filesystem existence check.
+        automation:
+          command: "pnpm run build && test -d public/_pagefind"
+          ci_job: "smoke_search"
+        expected:
+          - "`public/_pagefind` exists after build."
+        status: "optional"
+
+  - module_id: "deploy_pipeline"
+    importance: "high"
+    smoke_tests:
+      - id: "SMK_DEPLOYCFG_001"
+        name: "Deploy configuration drift check (static export + basePath)"
+        level: "smoke"
+        environment_ids: ["ci_github_actions"]
+        description: >
+          Ensure repo config remains compatible with GitHub Pages deployment:
+          static export enabled and basePath/assetPrefix are set consistently.
+        automation:
+          command: "pnpm run check:deploy-config"
+          ci_job: "smoke_deploy_config"
+        expected:
+          - "Static export config is enabled."
+          - "basePath/assetPrefix values are internally consistent."
+        status: "placeholder"
+
+# -------------------------------------------------------------------
+# 4. CI INTEGRATION (ORDER)
+# -------------------------------------------------------------------
+
+ci_integration:
+  pipelines:
+    - name: "main_smoke"
+      trigger: "pull_request_and_push_to_main"
+      environment_id: "ci_github_actions"
+      steps:
+        - "SMK_SITE_001"
+        - "SMK_SCHEMA_001"
+        - "SMK_LINK_001"
+        - "WF_SMK_001"
+      fail_policy: "fail_fast"
+
+local_execution:
+  recommended_commands:
+    - description: "Build-only smoke"
+      command: "corepack enable && pnpm install && pnpm run build"
+    - description: "Schema validation"
+      command: "pnpm run validate:content"
+    - description: "All smoke tests"
+      command: "pnpm run test:smoke"
+
+# -------------------------------------------------------------------
+# 5. MAINTENANCE
+# -------------------------------------------------------------------
+
+maintenance:
+  review_frequency: "monthly"
+  rules:
+    - "Any new module_id added to spec/10_architecture.ir.yml must get at least one smoke test here."
+    - "Smoke tests must be deterministic; flaky tests are forbidden."

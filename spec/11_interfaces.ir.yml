@@ -1,0 +1,166 @@
+# =====================================================================
+# 11_interfaces.ir.yml
+# =====================================================================
+# Interface & Schema Registry for `lab-site`
+#
+# Purpose:
+#   - Define the canonical structure of content entities.
+#   - Serve as the contract between Content Layer and UI Layer.
+#   - Enforce consistency in naming and data types.
+# =====================================================================
+
+metadata:
+  system_name: "lab-site"
+  version: 1.0.0
+  description: >
+    Data schemas for People, Papers, Projects, Notices, and Datasets.
+  last_updated_by: Gemini CLI
+  notes:
+    - "These schemas map directly to Zod/Valibot validators in code."
+    - "Fields marked '?' are optional."
+
+# -------------------------------------------------------------------
+# 1. PRIMITIVES & SHARED TYPES
+# -------------------------------------------------------------------
+
+primitives:
+  - name: Slug
+    type: string
+    pattern: "^[a-z0-9-]+$"
+    description: "URL-friendly identifier."
+
+  - name: Url
+    type: string
+    pattern: "^https?://.+"
+    description: "Valid external link."
+
+  - name: ImagePath
+    type: string
+    pattern: "^/.*\\.(png|jpg|jpeg|webp|svg)$"
+    description: "Path to image in public folder (e.g., /images/me.jpg)."
+
+  - name: ISO8601Date
+    type: string
+    pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+    description: "YYYY-MM-DD date string."
+
+  - name: Tag
+    type: string
+    description: "Category label (kebab-case preferred)."
+
+# -------------------------------------------------------------------
+# 2. CONTENT ENTITIES (SCHEMAS)
+# -------------------------------------------------------------------
+
+entities:
+  - name: Person
+    description: "A lab member (Professor, Student, Staff)."
+    fields:
+      - { name: name, type: string, required: true }
+      - { name: role, type: string, required: true, enum: ["Principal Investigator", "PhD Student", "Masters Student", "Undergrad", "Alumni", "Staff"] }
+      - { name: email, type: string, required: false }
+      - { name: affiliation, type: string, required: false, default: "Lab Member" }
+      - { name: bio, type: markdown, required: false, description: "Short biography." }
+      - { name: avatar, type: ImagePath, required: false }
+      - { name: website, type: Url, required: false }
+      - { name: twitter, type: Url, required: false }
+      - { name: github, type: Url, required: false }
+      - { name: linkedin, type: Url, required: false }
+      - { name: scholar, type: Url, required: false }
+      - { name: interests, type: list<string>, required: false }
+      - { name: active, type: boolean, required: true, default: true }
+
+  - name: Paper
+    description: "A research publication."
+    fields:
+      - { name: title, type: string, required: true }
+      - { name: authors, type: list<string>, required: true, description: "List of names or person IDs." }
+      - { name: venue, type: string, required: true, description: "Conference or Journal name." }
+      - { name: year, type: int, required: true }
+      - { name: date, type: ISO8601Date, required: true, description: "Used for precise sorting." }
+      - { name: abstract, type: markdown, required: false }
+      - { name: pdf_url, type: Url, required: false }
+      - { name: code_url, type: Url, required: false }
+      - { name: project_url, type: Url, required: false }
+      - { name: bibtex, type: string, required: false }
+      - { name: tags, type: list<Tag>, required: false }
+      - { name: thumbnail, type: ImagePath, required: false }
+      - { name: doi, type: string, required: false }
+
+  - name: Project
+    description: "A research project or grant."
+    fields:
+      - { name: title, type: string, required: true }
+      - { name: slug, type: Slug, required: true }
+      - { name: summary, type: string, required: true, description: "One-liner description." }
+      - { name: content, type: markdown, required: true, description: "Full project page content." }
+      - { name: status, type: string, required: true, enum: ["Active", "Completed", "Archived"] }
+      - { name: date_start, type: ISO8601Date, required: false }
+      - { name: date_end, type: ISO8601Date, required: false }
+      - { name: members, type: list<string>, required: false }
+      - { name: tags, type: list<Tag>, required: false }
+      - { name: cover_image, type: ImagePath, required: false }
+      - { name: repo_url, type: Url, required: false }
+      - { name: demo_url, type: Url, required: false }
+
+  - name: Notice
+    description: "News, announcements, or recruiting calls."
+    fields:
+      - { name: title, type: string, required: true }
+      - { name: date, type: ISO8601Date, required: true }
+      - { name: category, type: string, required: true, enum: ["News", "Seminar", "Recruiting", "Event"] }
+      - { name: pinned, type: boolean, required: false, default: false }
+      - { name: content, type: markdown, required: true }
+      - { name: expiry_date, type: ISO8601Date, required: false, description: "Hide after this date." }
+
+  - name: Dataset
+    description: "A downloadable dataset."
+    fields:
+      - { name: name, type: string, required: true }
+      - { name: description, type: markdown, required: true }
+      - { name: version, type: string, required: true }
+      - { name: license, type: string, required: true }
+      - { name: download_links, type: list<Url>, required: true }
+      - { name: citation, type: string, required: false }
+      - { name: tags, type: list<Tag>, required: false }
+      - { name: thumbnail, type: ImagePath, required: false }
+
+# -------------------------------------------------------------------
+# 3. INTERNAL STRUCTURES (Build-Time)
+# -------------------------------------------------------------------
+
+internal_structures:
+  - name: BuildManifest
+    description: "Generated by build process."
+    fields:
+      - { name: build_time, type: string }
+      - { name: commit_hash, type: string }
+      - { name: entity_counts, type: map<string, int> }
+
+# -------------------------------------------------------------------
+# 4. DATA SOURCES
+# -------------------------------------------------------------------
+
+data_sources:
+  - id: file_system_mdx
+    type: "local_file_system"
+    root_path: "content/"
+    format: "mdx_with_frontmatter"
+    mapping:
+      - { path: "content/people/*.mdx", entity: "Person" }
+      - { path: "content/papers/*.mdx", entity: "Paper" }
+      - { path: "content/projects/*.mdx", entity: "Project" }
+      - { path: "content/notices/*.mdx", entity: "Notice" }
+      - { path: "content/datasets/*.mdx", entity: "Dataset" }
+
+# -------------------------------------------------------------------
+# 5. NAMING & CONVENTIONS
+# -------------------------------------------------------------------
+
+conventions:
+  naming:
+    files: "kebab-case.mdx (e.g., `awesome-paper.mdx`)"
+    assets: "snake_case (e.g., `profile_pic.jpg`)"
+  formatting:
+    dates: "YYYY-MM-DD"
+    lists: "sorted by date desc (newest first) by default"

@@ -1,0 +1,315 @@
+# =====================================================================
+# 20_impl_plan.ir.yml
+# =====================================================================
+# Implementation Plan IR for `lab-site` (Next.js + Nextra)
+#
+# Scope of this file:
+# - Concrete repo layout (dirs/files/commands) for implementing 10_architecture.ir.yml
+# - Mapping from 10_architecture module_ids -> real paths + build units
+#
+# NOTE (current repo reality):
+# - The repo is already a Next.js + Nextra (Nextra blog starter) app at repo root.
+# - We do NOT introduce a `site/` subdirectory unless/until a migration is desired.
+# =====================================================================
+
+metadata:
+  system_name: "lab-site"
+  plan_version: "1.0.0"
+  last_updated: "2025-12-19"
+  last_updated_by: "Codex Max"
+  based_on_architecture_version: "1.0.0"
+  related_specs:
+    - "spec/00_high_level_plan.md"
+    - "spec/01_constraints.md"
+    - "spec/10_architecture.ir.yml"
+    - "spec/11_interfaces.ir.yml"
+  notes:
+    - "This plan is the concrete mapping layer; architecture (10) and schemas (11) remain authoritative."
+    - "Primary target is GitHub Pages static export; basePath/assetPrefix must be set."
+    - "Content is the database under `content/` and must validate against `spec/11_interfaces.ir.yml`."
+
+# -------------------------------------------------------------------
+# 1. GLOBAL IMPLEMENTATION STRATEGY
+# -------------------------------------------------------------------
+
+strategy:
+  repo_style: "single_nextjs_app"
+  package_manager:
+    name: "pnpm"
+    rationale: "pnpm-lock.yaml already exists; CI should use frozen lockfile."
+    recommended_setup:
+      - "corepack enable"
+      - "pnpm install --frozen-lockfile"
+  languages:
+    - "TypeScript (strict)"
+    - "MDX (with YAML frontmatter)"
+    - "YAML/JSON (tooling/config)"
+  nextjs_nextra:
+    next_version: ">=16"
+    router: "app_router"
+    content_engine: "nextra"
+    static_export:
+      required: true
+      mechanism: "Next.js `output: 'export'` (no runtime server)"
+  deployment_target:
+    primary: "GitHub Pages"
+    artifact_dir: "out/"
+
+# -------------------------------------------------------------------
+# 2. DIRECTORY LAYOUT (CONCRETE)
+# -------------------------------------------------------------------
+
+repository_layout:
+  roots:
+    - path: "src/"
+      description: "Next.js app code (App Router), components, and build-time libs."
+    - path: "content/"
+      description: "Content database (MDX entries + MDX pages)."
+    - path: "public/"
+      description: "Static assets (images, favicon) + generated search assets (e.g., Pagefind)."
+    - path: "scripts/"
+      description: "Node scripts for validation, link checking, and build helpers."
+    - path: "tests/"
+      description: "Fast smoke tests (CI-gating)."
+    - path: "spec/"
+      description: "IR + constraints + plans (this directory)."
+
+  content_layout:
+    # Canonical entity directories (must match spec/11_interfaces.ir.yml:data_sources.mapping)
+    - path: "content/people/"
+      entity: "Person"
+      file_glob: "*.mdx"
+    - path: "content/papers/"
+      entity: "Paper"
+      file_glob: "*.mdx"
+    - path: "content/projects/"
+      entity: "Project"
+      file_glob: "*.mdx"
+    - path: "content/notices/"
+      entity: "Notice"
+      file_glob: "*.mdx"
+    - path: "content/datasets/"
+      entity: "Dataset"
+      file_glob: "*.mdx"
+
+    # Optional: non-entity MDX pages (home, about, etc.)
+    - path: "content/pages/"
+      purpose: "MDX pages not tied to an entity schema."
+      file_glob: "**/*.mdx"
+
+# -------------------------------------------------------------------
+# 3. MODULE-TO-PATH REALIZATION (MUST MATCH 10_architecture.ir.yml)
+# -------------------------------------------------------------------
+
+build_units:
+  - id: "site_app"
+    description: "Single Next.js + Nextra application at repo root."
+    root: "."
+    language: "TypeScript"
+    package_json: "package.json"
+
+modules:
+  - module_id: "content_loader"
+    layer: "schema_index_layer"
+    build_unit: "site_app"
+    language: "TypeScript (Node.js at build time)"
+    path: "src/lib/content/"
+    responsibilities_to_impl:
+      - "Traverse `content/**.mdx` for each entity type."
+      - "Parse frontmatter (YAML) + MDX body."
+      - "Return (filePath, slug, frontmatter, rawBody) objects for validation."
+    planned_files:
+      - "src/lib/content/fs.ts"
+      - "src/lib/content/globs.ts"
+      - "src/lib/content/loaders.ts"
+      - "src/lib/content/mdx.ts"
+      - "src/lib/content/slug.ts"
+      - "src/lib/content/types.ts"
+    existing_files_to_refactor_or_retire:
+      - "src/lib/get-posts.ts"
+      - "src/lib/get-tags.ts"
+
+  - module_id: "schema_validator"
+    layer: "schema_index_layer"
+    build_unit: "site_app"
+    language: "TypeScript (Node.js at build time)"
+    path: "src/lib/schemas/"
+    responsibilities_to_impl:
+      - "Define Zod/Valibot schemas mirroring `spec/11_interfaces.ir.yml`."
+      - "Validate each MDX entry as an entity object (frontmatter + body-derived fields) against the correct entity schema."
+      - "Fail fast with descriptive errors including file path + field name."
+    planned_files:
+      - "src/lib/schemas/primitives.ts"
+      - "src/lib/schemas/person.ts"
+      - "src/lib/schemas/paper.ts"
+      - "src/lib/schemas/project.ts"
+      - "src/lib/schemas/notice.ts"
+      - "src/lib/schemas/dataset.ts"
+      - "src/lib/schemas/index.ts"
+      - "scripts/validate-content.ts"
+
+  - module_id: "index_builder"
+    layer: "schema_index_layer"
+    build_unit: "site_app"
+    language: "TypeScript (Node.js at build time)"
+    path: "src/lib/indexes/"
+    responsibilities_to_impl:
+      - "Build derived indexes required for list pages: years, tags, authors, roles."
+      - "Provide stable sort orders (by date desc unless specified)."
+      - "Expose typed accessors used by route code."
+    planned_files:
+      - "src/lib/indexes/build-indexes.ts"
+      - "src/lib/indexes/papers.ts"
+      - "src/lib/indexes/people.ts"
+      - "src/lib/indexes/projects.ts"
+      - "src/lib/indexes/notices.ts"
+      - "src/lib/indexes/datasets.ts"
+      - "src/lib/indexes/types.ts"
+
+  - module_id: "page_renderer"
+    layer: "routing_seo_layer"
+    build_unit: "site_app"
+    language: "TypeScript (React)"
+    path: "src/app/"
+    responsibilities_to_impl:
+      - "Nextra MDX routing for content pages (catch-all MDX route)."
+      - "Entity index pages: /people, /papers, /projects, /notices, /datasets."
+      - "SEO: sitemap.xml, robots.txt, OpenGraph metadata."
+      - "Ensure static export compatibility (no runtime server dependencies)."
+    key_existing_files:
+      - "src/app/[[...mdxPath]]/page.tsx"
+      - "src/app/layout.tsx"
+      - "src/app/sitemap.ts"
+      - "src/app/robots.ts"
+      - "src/app/rss.xml/route.ts"
+      - "src/app/_meta.global.ts"
+    planned_files:
+      - "src/app/people/page.tsx"
+      - "src/app/papers/page.tsx"
+      - "src/app/projects/page.tsx"
+      - "src/app/notices/page.tsx"
+      - "src/app/datasets/page.tsx"
+      - "src/components/entity-cards/"
+      - "src/components/entity-lists/"
+
+  - module_id: "search_indexer (Optional)"
+    layer: "build_deploy_layer"
+    build_unit: "site_app"
+    language: "Node.js CLI tooling"
+    path: "scripts/search/"
+    responsibilities_to_impl:
+      - "Generate client-side search assets (default: Pagefind) after build."
+      - "Write outputs under `public/` so they are deployed with the site."
+    key_existing_files:
+      - "package.json#scripts.postbuild"
+    planned_files:
+      - "scripts/search/build-pagefind.ts"
+      - "scripts/search/pagefind.config.json"
+    notes:
+      - "10_architecture uses module id `search_indexer (Optional)` but workflow steps reference `search_indexer` (inconsistency; see checklist)."
+
+  - module_id: "deploy_pipeline"
+    layer: "build_deploy_layer"
+    build_unit: "site_app"
+    language: "GitHub Actions (YAML)"
+    path: ".github/workflows/"
+    responsibilities_to_impl:
+      - "CI: install, typecheck, smoke tests, build/export."
+      - "CD: deploy `out/` to GitHub Pages."
+    planned_files:
+      - ".github/workflows/ci.yml"
+      - ".github/workflows/pages.yml"
+      - "scripts/check-deploy-config.ts"
+    config_files:
+      - "next.config.mjs"
+
+# -------------------------------------------------------------------
+# 4. COMMANDS (PLACEHOLDERS ALLOWED)
+# -------------------------------------------------------------------
+
+commands:
+  # Prefer pnpm (repo already uses pnpm-lock.yaml). Keep npm equivalents as fallback.
+  dev:
+    command: "pnpm dev"
+    description: "Local dev server with hot reload."
+  build:
+    command: "pnpm build"
+    description: "Production build (and postbuild search indexing if enabled)."
+  export:
+    command: "pnpm build"
+    description: "Static export is produced by `next build` once `output: 'export'` is configured."
+    outputs:
+      - "out/"
+  lint:
+    command: "pnpm lint"
+    description: "Placeholder until eslint/next-lint is wired."
+    status: "placeholder"
+  typecheck:
+    command: "pnpm typecheck"
+    description: "Run TypeScript compiler in noEmit mode."
+    status: "placeholder"
+  validate_content:
+    command: "pnpm validate:content"
+    description: "Validate all entity MDX entries (frontmatter + body-derived fields) against `spec/11_interfaces.ir.yml`-equivalent validators."
+    status: "placeholder"
+  linkcheck:
+    command: "pnpm linkcheck"
+    description: "Check internal (and optionally external) links in static output."
+    status: "placeholder"
+  test_smoke:
+    command: "pnpm test:smoke"
+    description: "Run smoke tests from spec/21_test_plan.ir.yml."
+    status: "placeholder"
+
+# -------------------------------------------------------------------
+# 5. CONFIGURATION CHECKLIST (TO IMPLEMENT)
+# -------------------------------------------------------------------
+
+configuration:
+  github_pages:
+    required:
+      - "Set `output: 'export'` in next.config.mjs."
+      - "Set `basePath` and `assetPrefix` for subpath deploys."
+      - "Ensure `images.unoptimized: true` if next/image is used on export."
+      - "Emit `.nojekyll` in output (if needed) for GitHub Pages."
+    inputs_needed:
+      - id: "SITE_BASE_PATH"
+        description: "Usually `/<repo-name>` for GitHub Pages project sites."
+      - id: "SITE_URL"
+        description: "Canonical URL used for sitemap/OG."
+
+  content_rules:
+    required:
+      - "One entry = one file under `content/<entity>/`."
+      - "Dates are ISO8601 (YYYY-MM-DD) where required."
+      - "Slugs (if used) are kebab-case and stable."
+    mdx_body_mapping:
+      rule: >
+        For entity schemas that include required markdown fields in spec/11_interfaces.ir.yml
+        (e.g., Project.content, Notice.content, Dataset.description), the MDX file body is the
+        canonical source and must be mapped into those fields before validation.
+      optional_fields:
+        - "Person.bio may come from frontmatter or body (choose one convention and enforce it)."
+        - "Paper.abstract may come from frontmatter or body (choose one convention and enforce it)."
+
+# -------------------------------------------------------------------
+# 6. TEST PLAN LINKAGE (SEE spec/21_test_plan.ir.yml)
+# -------------------------------------------------------------------
+
+tests_mapping:
+  - module_id: "page_renderer"
+    smoke_tests:
+      - "SMK_SITE_001"
+      - "SMK_LINK_001"
+  - module_id: "schema_validator"
+    smoke_tests:
+      - "SMK_SCHEMA_001"
+  - module_id: "index_builder"
+    smoke_tests:
+      - "WF_SMK_001"
+  - module_id: "search_indexer (Optional)"
+    smoke_tests:
+      - "SMK_SITE_001"
+  - module_id: "deploy_pipeline"
+    smoke_tests:
+      - "SMK_SITE_001"

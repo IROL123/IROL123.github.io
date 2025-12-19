@@ -1,11 +1,21 @@
 import nextra from 'nextra'
- 
+
 const withNextra = nextra({
-    defaultShowCopyCode: true,
-    // readingTime: true
+  defaultShowCopyCode: true,
 })
- 
-// You can include other Next.js configuration options here, in addition to Nextra settings:
+
+// GitHub Pages configuration
+// For user/org pages (username.github.io), no basePath needed
+// For project pages (username.github.io/repo), set basePath: '/repo'
+const isProd = process.env.NODE_ENV === 'production'
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ''
+
 export default withNextra({
-  // ... Other Next.js config options
+  output: 'export',
+  basePath: basePath || undefined,
+  assetPrefix: basePath || undefined,
+  images: {
+    unoptimized: true,
+  },
+  trailingSlash: true,
 })

@@ -1,0 +1,351 @@
+# =====================================================================
+# 31_todo_backlog.ir.yml
+# =====================================================================
+# Cumulative backlog for `lab-site` (Next.js + Nextra).
+# Keep DONE items in-file for traceability; avoid deleting history.
+# =====================================================================
+
+metadata:
+  system_name: "lab-site"
+  backlog_version: "1.0.0"
+  last_updated: "2025-12-19T00:00:00Z"
+  last_updated_by: "Codex Max"
+  related_specs:
+    - "spec/00_high_level_plan.md"
+    - "spec/01_constraints.md"
+    - "spec/10_architecture.ir.yml"
+    - "spec/11_interfaces.ir.yml"
+    - "spec/20_impl_plan.ir.yml"
+    - "spec/21_test_plan.ir.yml"
+    - "spec/30_code_status.ir.yml"
+  notes:
+    - "Priorities are oriented to getting a correct, deployable static lab site first."
+    - "Backlog items reference 10_architecture module_ids (see consistency checklist for known inconsistencies)."
+
+enums:
+  types:
+    - { name: feature, description: "New capability, behavior, or module." }
+    - { name: bug, description: "Incorrect behavior or defect in existing code." }
+    - { name: refactor, description: "Quality improvement without feature change." }
+    - { name: doc, description: "Documentation, diagrams, or specs work." }
+    - { name: infra, description: "Build, CI, deployment, or tooling improvements." }
+    - { name: research, description: "Exploratory work, design spikes, experiments." }
+    - { name: chore, description: "Minor cleanups or housekeeping." }
+
+  status:
+    - { name: open, description: "Planned but not started." }
+    - { name: in_progress, description: "Currently being worked on." }
+    - { name: blocked, description: "Cannot proceed due to dependency." }
+    - { name: done, description: "Completed; meets acceptance criteria." }
+    - { name: dropped, description: "Canceled; include rationale." }
+
+  priority:
+    - { name: P0, description: "Critical; must be addressed immediately." }
+    - { name: P1, description: "High; next in line after P0." }
+    - { name: P2, description: "Normal; important but not urgent." }
+    - { name: P3, description: "Low; nice-to-have." }
+
+  origin:
+    - { name: architecture, description: "Derived from architecture gaps/decisions." }
+    - { name: impl_plan, description: "Derived from implementation plan (20)." }
+    - { name: code_status, description: "Derived from baseline snapshot (30)." }
+    - { name: test_plan, description: "Derived from smoke test plan (21)." }
+    - { name: user_request, description: "Direct user/product request." }
+    - { name: other, description: "Anything else (explain in notes)." }
+
+views:
+  summary_by_status:
+    open_count: 6
+    in_progress_count: 1
+    blocked_count: 0
+    done_count: 0
+    dropped_count: 0
+  focus_areas:
+    - "Static export + basePath correctness (GitHub Pages)."
+    - "Schema validation as a hard gate (fail build on invalid content)."
+    - "Entity pages + derived indexes (People/Papers/Projects/Notices/Datasets)."
+    - "Fast smoke tests + CI."
+
+items:
+  - id: "BL-0001"
+    title: "Bootstrap repo baseline with Nextra starter (confirm + stabilize)"
+    type: "infra"
+    status: "in_progress"
+    priority: "P0"
+    origin: "code_status"
+    created_at: "2025-12-19"
+    updated_at: "2025-12-19"
+    created_by: "Codex Max"
+    owner: "TODO_owner"
+    module_ids:
+      - "page_renderer"
+      - "search_indexer (Optional)"
+    related_files:
+      - "package.json"
+      - "next.config.mjs"
+      - "src/app/[[...mdxPath]]/page.tsx"
+    related_specs:
+      - "spec/20_impl_plan.ir.yml"
+      - "spec/30_code_status.ir.yml"
+    description: >
+      Confirm the current Nextra starter is the intended baseline and stabilize
+      the repo (lock package manager, ensure `pnpm install` + `pnpm build` works in CI).
+    acceptance_criteria:
+      - "`corepack enable && pnpm install --frozen-lockfile` succeeds in CI."
+      - "`pnpm run build` succeeds in CI."
+      - "Remove/replace starter copy that conflicts with lab-site IA (as follow-up tasks)."
+    dependencies:
+      internal: []
+      external: []
+    risk:
+      level: "low"
+      notes:
+        - "Mostly wiring/verification; low product risk."
+    history:
+      - timestamp: "2025-12-19T00:00:00Z"
+        actor: "Codex Max"
+        change: "Created backlog item with status 'in_progress' based on current repo state."
+
+  - id: "BL-0002"
+    title: "GitHub Pages deploy readiness: static export + basePath/assetPrefix"
+    type: "infra"
+    status: "open"
+    priority: "P0"
+    origin: "impl_plan"
+    created_at: "2025-12-19"
+    updated_at: "2025-12-19"
+    created_by: "Codex Max"
+    owner: "TODO_owner"
+    module_ids:
+      - "page_renderer"
+      - "deploy_pipeline"
+    related_files:
+      - "next.config.mjs"
+      - ".github/workflows/pages.yml"
+    related_specs:
+      - "spec/01_constraints.md"
+      - "spec/20_impl_plan.ir.yml"
+    description: >
+      Configure Next.js for static export and subpath hosting (GitHub Pages project site),
+      including basePath and assetPrefix and any required export-time settings.
+    acceptance_criteria:
+      - "Static export produces `out/` with expected routes."
+      - "Deployed Pages site works under `/<repo>/` basePath without broken assets."
+      - "Sitemap/robots URLs use the configured canonical site URL."
+    dependencies:
+      internal: ["BL-0001"]
+      external: []
+    risk:
+      level: "medium"
+      notes:
+        - "Misconfigured basePath causes broken assets/links on GitHub Pages."
+    history:
+      - timestamp: "2025-12-19T00:00:00Z"
+        actor: "Codex Max"
+        change: "Created backlog item with status 'open'."
+
+  - id: "BL-0003"
+    title: "Implement entity schemas + content validator CLI (fail-fast)"
+    type: "feature"
+    status: "open"
+    priority: "P0"
+    origin: "architecture"
+    created_at: "2025-12-19"
+    updated_at: "2025-12-19"
+    created_by: "Codex Max"
+    owner: "TODO_owner"
+    module_ids:
+      - "content_loader"
+      - "schema_validator"
+    related_files:
+      - "src/lib/content/"
+      - "src/lib/schemas/"
+      - "scripts/validate-content.ts"
+    related_specs:
+      - "spec/11_interfaces.ir.yml"
+      - "spec/01_constraints.md"
+      - "spec/21_test_plan.ir.yml"
+    description: >
+      Implement TypeScript validators (Zod/Valibot) that mirror spec/11_interfaces.ir.yml
+      and a CLI (`pnpm validate:content`) that validates all entity entries under `content/`.
+    acceptance_criteria:
+      - "`pnpm validate:content` fails on first invalid file with clear (file, field) error."
+      - "All canonical entities are supported: Person/Paper/Project/Notice/Dataset."
+      - "Required markdown fields in spec/11 (e.g., Project.content) are sourced from MDX body consistently."
+      - "CI smoke test SMK_SCHEMA_001 is green."
+    dependencies:
+      internal: ["BL-0001"]
+      external: []
+    risk:
+      level: "medium"
+      notes:
+        - "Schema drift risk if validators deviate from IR; keep mapping mechanical."
+    history:
+      - timestamp: "2025-12-19T00:00:00Z"
+        actor: "Codex Max"
+        change: "Created backlog item with status 'open'."
+
+  - id: "BL-0004"
+    title: "Implement derived indexes (papers by year/tags/authors; people by role)"
+    type: "feature"
+    status: "open"
+    priority: "P1"
+    origin: "architecture"
+    created_at: "2025-12-19"
+    updated_at: "2025-12-19"
+    created_by: "Codex Max"
+    owner: "TODO_owner"
+    module_ids:
+      - "index_builder"
+      - "schema_validator"
+    related_files:
+      - "src/lib/indexes/"
+    related_specs:
+      - "spec/10_architecture.ir.yml"
+      - "spec/21_test_plan.ir.yml"
+    description: >
+      Build the minimal derived indexes required to render list pages and cross-links.
+      Start with papers (year desc), then people by role, then tags/authors maps.
+    acceptance_criteria:
+      - "WF_SMK_001 can verify the papers index includes a fixture paper."
+      - "Indexes are deterministic and stable (no time-dependent ordering)."
+    dependencies:
+      internal: ["BL-0003"]
+      external: []
+    risk:
+      level: "medium"
+      notes:
+        - "Author mapping needs a clear convention (name vs person ID); keep consistent with spec/11."
+    history:
+      - timestamp: "2025-12-19T00:00:00Z"
+        actor: "Codex Max"
+        change: "Created backlog item with status 'open'."
+
+  - id: "BL-0005"
+    title: "Add People/Papers/Projects/Notices/Datasets index pages and basic cards"
+    type: "feature"
+    status: "open"
+    priority: "P1"
+    origin: "impl_plan"
+    created_at: "2025-12-19"
+    updated_at: "2025-12-19"
+    created_by: "Codex Max"
+    owner: "TODO_owner"
+    module_ids:
+      - "page_renderer"
+      - "index_builder"
+    related_files:
+      - "src/app/people/page.tsx"
+      - "src/app/papers/page.tsx"
+      - "src/app/projects/page.tsx"
+      - "src/app/notices/page.tsx"
+      - "src/app/datasets/page.tsx"
+      - "src/components/entity-cards/"
+    related_specs:
+      - "spec/00_high_level_plan.md"
+      - "spec/11_interfaces.ir.yml"
+      - "spec/20_impl_plan.ir.yml"
+    description: >
+      Implement the core IA routes and minimal UI components to list each entity type.
+      Individual entry pages can remain MDX-rendered via Nextra.
+    acceptance_criteria:
+      - "Each entity has a working index route with deterministic ordering."
+      - "Each list entry links to its MDX detail page."
+      - "No schema-invalid content can render (validation gates the build)."
+    dependencies:
+      internal: ["BL-0004"]
+      external: []
+    risk:
+      level: "low"
+      notes:
+        - "UI can be iterated later; correctness first."
+    history:
+      - timestamp: "2025-12-19T00:00:00Z"
+        actor: "Codex Max"
+        change: "Created backlog item with status 'open'."
+
+  - id: "BL-0006"
+    title: "Implement smoke tests + wire CI (build/schema/link/workflow)"
+    type: "infra"
+    status: "open"
+    priority: "P1"
+    origin: "test_plan"
+    created_at: "2025-12-19"
+    updated_at: "2025-12-19"
+    created_by: "Codex Max"
+    owner: "TODO_owner"
+    module_ids:
+      - "deploy_pipeline"
+      - "page_renderer"
+      - "schema_validator"
+      - "index_builder"
+    related_files:
+      - "tests/smoke/"
+      - ".github/workflows/ci.yml"
+    related_specs:
+      - "spec/21_test_plan.ir.yml"
+      - "spec/20_impl_plan.ir.yml"
+    description: >
+      Add the minimal smoke tests defined in spec/21_test_plan.ir.yml and run them in CI.
+      Keep total runtime under 10 minutes.
+    acceptance_criteria:
+      - "SMK_SITE_001, SMK_SCHEMA_001, SMK_LINK_001, WF_SMK_001 are green on PRs."
+      - "CI uses frozen lockfile install."
+    dependencies:
+      internal: ["BL-0002", "BL-0003", "BL-0004"]
+      external: []
+    risk:
+      level: "low"
+      notes:
+        - "Primary risk is CI flakiness; keep tests offline and deterministic."
+    history:
+      - timestamp: "2025-12-19T00:00:00Z"
+        actor: "Codex Max"
+        change: "Created backlog item with status 'open'."
+
+  - id: "BL-0007"
+    title: "Migrate/replace starter blog content to lab-site content directories"
+    type: "chore"
+    status: "open"
+    priority: "P1"
+    origin: "code_status"
+    created_at: "2025-12-19"
+    updated_at: "2025-12-19"
+    created_by: "Codex Max"
+    owner: "TODO_owner"
+    module_ids:
+      - "content_loader"
+      - "page_renderer"
+    related_files:
+      - "content/posts/"
+      - "content/people/"
+      - "content/papers/"
+      - "content/projects/"
+      - "content/notices/"
+      - "content/datasets/"
+    related_specs:
+      - "spec/11_interfaces.ir.yml"
+      - "spec/30_code_status.ir.yml"
+    description: >
+      Transition the repo from the starter blog content layout (`content/posts`) to the
+      canonical lab-site entity layout required by spec/11_interfaces.ir.yml.
+    acceptance_criteria:
+      - "`content/posts` is either removed or reclassified as Notices/Pages with clear routing."
+      - "At least one valid entry exists for each entity directory (can be fixtures)."
+    dependencies:
+      internal: ["BL-0003"]
+      external: []
+    risk:
+      level: "low"
+      notes:
+        - "Mostly content churn; do after validators exist to prevent silent drift."
+    history:
+      - timestamp: "2025-12-19T00:00:00Z"
+        actor: "Codex Max"
+        change: "Created backlog item with status 'open'."
+
+maintenance:
+  review_frequency: "biweekly"
+  rules:
+    - "Record status changes in each item's history."
+    - "Avoid deleting items; mark dropped with rationale."

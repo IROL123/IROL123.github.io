@@ -1,67 +1,258 @@
-# Nextra Blog Starter
-<img width="1632" height="1061" alt="screenshot" src="https://github.com/user-attachments/assets/1c2ee6d0-719d-4f56-b39b-99dc3fcbb428" />
+# Lab Site
 
-A modern, feature-rich blog template built with [Nextra](https://nextra.site).
-
-## 🚀 Demo
-
-- [Official Nextra Documentation](https://nextra.site)
-- [Live Demo of This Template](https://nextra-blog.phucbm.com)
-
-## Quick Start
-
-You can deploy this template on Vercel by clicking the button below
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fphucbm%2Fnextra-blog-starter)
+A research lab website built with [Next.js](https://nextjs.org) and [Nextra](https://nextra.site), designed for managing and displaying People, Papers, Projects, Notices, and Datasets.
 
 ## Features
 
-- [Nextra 4](https://nextra.site/docs) with Next.js 16 + React 19 + TypeScript
-- [shadcn/ui](https://ui.shadcn.com/) and Tailwind CSS
-- [Pagefind](https://the-guild.dev/blog/nextra-4#new-search-engine--pagefind) for search engine
-- [Giscus](https://giscus.app/) for commenting system
-- [View Transitions API](https://developer.mozilla.org/en-US/docs/Web/API/View_Transitions_API) in Next.js App Router with [next-view-transitions](https://github.com/shuding/next-view-transitions)
+- **Content-Driven**: All content lives in `content/` as MDX files with YAML frontmatter
+- **Schema Validation**: Zod-based validation ensures content integrity
+- **Static Export**: Fully static site deployable to GitHub Pages
+- **Automatic Lists**: Entity pages are auto-generated from content files
+- **Tag Filtering**: Papers and projects support tag-based organization
+- **Search**: Built-in Pagefind for client-side search
 
-## Local Development
+## Quick Start
 
-### Clone this repository
+### Prerequisites
 
-Using the GitHub CLI:
+- Node.js 20+ (LTS)
+- pnpm (via Corepack)
+
+### Installation
+
 ```bash
-gh repo clone phucbm/nextra-blog-starter
-```
+# Enable Corepack for pnpm
+corepack enable
 
-### Install
-```bash
-pnpm i
-```
+# Install dependencies
+pnpm install
 
-### Run the development server
-```bash
+# Start development server
 pnpm dev
 ```
 
-## 📝 Usage
+### Build & Deploy
 
-### Adding New Posts
+```bash
+# Build static site
+pnpm build
 
-1. Create a new `.mdx` file in the `content` directory
-2. Add your front matter at the top of the file:
+# Output is in out/ directory
+```
+
+## Content Management
+
+### Directory Structure
+
+```
+content/
+├── people/          # Lab members (Person schema)
+├── papers/          # Publications (Paper schema)
+├── projects/        # Research projects (Project schema)
+├── notices/         # Announcements (Notice schema)
+├── datasets/        # Datasets (Dataset schema)
+└── posts/           # Blog posts (existing Nextra blog)
+```
+
+### Adding Content
+
+Each content type has its own schema. Create a new `.mdx` file in the appropriate directory.
+
+#### How to Add a Person
+
+Create `content/people/firstname-lastname.mdx`:
 
 ```yaml
 ---
-title: Your Post Title
-date: 2025/1/30
-description: A brief description of your post
-tags: [ "web development", "react" ]
-author: Your Name
+name: "First Last"
+role: "PhD Student"  # Options: Principal Investigator, PhD Student, Masters Student, Undergrad, Alumni, Staff
+email: "email@example.edu"
+affiliation: "Department of Computer Science"
+avatar: "/images/people/firstname-lastname.jpg"  # Optional
+website: "https://example.com"  # Optional
+github: "https://github.com/username"  # Optional
+linkedin: "https://linkedin.com/in/username"  # Optional
+scholar: "https://scholar.google.com/citations?user=..."  # Optional
+interests:
+  - "Robotics"
+  - "Machine Learning"
+active: true
 ---
+
+Optional biography content goes here. This will appear in the person's profile.
 ```
 
-3. Write your content in MDX format below the front matter
+#### How to Add a Paper
 
+Create `content/papers/paper-slug.mdx`:
+
+```yaml
+---
+title: "Paper Title"
+authors:
+  - "Author One"
+  - "Author Two"
+venue: "Conference/Journal Name"
+year: 2024
+date: "2024-06-15"  # YYYY-MM-DD format
+pdf_url: "https://example.com/paper.pdf"  # Optional
+code_url: "https://github.com/example/repo"  # Optional
+project_url: "https://project-page.com"  # Optional
+bibtex: |  # Optional
+  @article{...}
+tags:
+  - "robotics"
+  - "deep-learning"
+doi: "10.1000/example"  # Optional
+thumbnail: "/images/papers/paper-thumbnail.jpg"  # Optional
 ---
 
-Created with ❤️ by PHUCBM
+Optional abstract content goes here.
+```
 
-Don't forget to ⭐ this repository if you found it helpful!
+#### How to Add a Project
+
+Create `content/projects/project-slug.mdx`:
+
+```yaml
+---
+title: "Project Title"
+slug: "project-slug"  # URL-friendly identifier
+summary: "One-liner description of the project."
+status: "Active"  # Options: Active, Completed, Archived
+date_start: "2023-01-01"  # Optional
+date_end: "2024-12-31"  # Optional
+members:
+  - "Team Member 1"
+  - "Team Member 2"
+tags:
+  - "robotics"
+  - "manipulation"
+cover_image: "/images/projects/cover.jpg"  # Optional
+repo_url: "https://github.com/example/project"  # Optional
+demo_url: "https://demo.example.com"  # Optional
+---
+
+Full project description goes here. This is the main content of the project page.
+
+## Research Goals
+
+You can use markdown formatting in the content.
+
+## Results
+
+And include any additional sections.
+```
+
+#### How to Add a Notice
+
+Create `content/notices/notice-slug.mdx`:
+
+```yaml
+---
+title: "Notice Title"
+date: "2024-12-01"  # YYYY-MM-DD format
+category: "News"  # Options: News, Seminar, Recruiting, Event
+pinned: true  # Optional, shows at top of list
+expiry_date: "2025-01-01"  # Optional, hides after this date
+---
+
+Notice content goes here. This can include markdown formatting.
+
+- Bullet points
+- Links to resources
+- etc.
+```
+
+#### How to Add a Dataset
+
+Create `content/datasets/dataset-slug.mdx`:
+
+```yaml
+---
+name: "Dataset Name"
+version: "1.0"
+license: "MIT"  # or CC-BY-4.0, Apache-2.0, etc.
+download_links:
+  - "https://example.com/dataset.zip"
+  - "https://mirror.example.com/dataset.zip"  # Optional additional links
+tags:
+  - "robotics"
+  - "computer-vision"
+citation: |  # Optional
+  @dataset{example_2024,
+    title={Dataset Name},
+    author={Author},
+    year={2024}
+  }
+thumbnail: "/images/datasets/thumbnail.jpg"  # Optional
+---
+
+Dataset description goes here. Explain what the dataset contains, how to use it, and any relevant details.
+
+## Contents
+
+- Description of dataset contents
+- Format specifications
+- Usage instructions
+```
+
+## Validation
+
+Content is validated against schemas before build:
+
+```bash
+# Validate all content
+pnpm validate:content
+```
+
+If validation fails, the build will fail with descriptive error messages showing the file and field with issues.
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start development server |
+| `pnpm build` | Build for production |
+| `pnpm validate:content` | Validate content against schemas |
+| `pnpm typecheck` | Run TypeScript type checking |
+| `pnpm test:smoke` | Run smoke tests |
+
+## Deployment
+
+The site is configured for GitHub Pages deployment:
+
+1. Push to `main` branch
+2. GitHub Actions builds and deploys automatically
+3. Site is available at your GitHub Pages URL
+
+### Configuration
+
+For project pages (e.g., `username.github.io/repo-name`), set the base path:
+
+```bash
+# In your environment or .env file
+NEXT_PUBLIC_BASE_PATH=/repo-name
+```
+
+## Project Structure
+
+```
+├── .github/workflows/    # CI/CD configuration
+├── content/              # MDX content files
+├── public/               # Static assets
+├── scripts/              # Build and validation scripts
+├── src/
+│   ├── app/              # Next.js App Router pages
+│   ├── components/       # React components
+│   └── lib/
+│       ├── content/      # Content loading utilities
+│       ├── indexes/      # Content indexing functions
+│       └── schemas/      # Zod validation schemas
+├── spec/                 # System specifications (IR)
+└── tests/                # Smoke tests
+```
+
+## License
+
+MIT License
