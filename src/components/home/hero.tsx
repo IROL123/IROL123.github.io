@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { ArrowRight, ChevronDown, Cpu, Microscope } from 'lucide-react'
+import { FloatingOrbs, FloatingParticles } from './floating-particles'
 
 export function Hero() {
     return (
@@ -10,6 +11,9 @@ export function Hero() {
             <div className="absolute inset-0 z-0">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(30,58,138,0.4),rgba(10,25,47,1))]" />
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+                {/* Floating animations */}
+                <FloatingOrbs />
+                <FloatingParticles count={25} />
                 {/* Gradient overlay for header visibility */}
                 <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
             </div>
