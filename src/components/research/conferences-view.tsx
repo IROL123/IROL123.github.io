@@ -3,11 +3,11 @@
 import { useLanguage } from '@/lib/i18n'
 
 interface Conference {
-    id: number
+    id: string
     title: string
-    authors: string
-    year: string
-    meta: string
+    authors?: string
+    year: number | string
+    meta?: string
 }
 
 interface ConferencesViewProps {

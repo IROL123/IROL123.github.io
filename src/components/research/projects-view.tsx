@@ -3,11 +3,11 @@
 import { useLanguage } from '@/lib/i18n'
 
 interface Project {
-    id: number
+    id: string
     title: string
-    funding: string
-    year: string
-    role: string
+    funding?: string
+    year: number | string
+    role?: string
     description?: string
 }
 

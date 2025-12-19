@@ -4,10 +4,10 @@ import { useLanguage } from '@/lib/i18n'
 import { IconCertificate } from '@tabler/icons-react'
 
 interface Patent {
-    id: number
+    id: string
     title: string
-    year: string
-    meta: string
+    year: number | string
+    meta?: string
     description?: string
 }
 
