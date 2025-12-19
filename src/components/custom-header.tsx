@@ -17,7 +17,6 @@ import {
     IconMicroscope
 } from '@tabler/icons-react'
 import Logo from '@/components/logo'
-import LiquidGlass from '@/components/ui/liquid-glass'
 
 interface NavItem {
     href: string
@@ -183,38 +182,25 @@ export function CustomHeader() {
                         </div>
                     </Link>
 
-                    {/* Desktop Navigation - Liquid Glass Style */}
-                    <LiquidGlass
-                        borderRadius={999}
-                        blur={24}
-                        contrast={1.3}
-                        saturation={1.4}
-                        brightness={1.15}
-                        shadowIntensity={0.2}
-                        displacementScale={2.5}
-                        elasticity={0.5}
-                        zIndex={100}
-                        className="hidden lg:flex ml-auto"
-                    >
-                        <nav className="flex items-center gap-1 px-2 py-1.5">
-                            {NAV_ITEMS.map((item) => {
-                                const isActive = pathname === item.href ||
-                                    (item.href !== '/' && pathname.startsWith(item.href))
+                    {/* Desktop Navigation - Glass Style */}
+                    <nav className="hidden lg:flex items-center gap-1 px-2 py-1.5 ml-auto rounded-full bg-white/10 dark:bg-white/5 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.12)]">
+                        {NAV_ITEMS.map((item) => {
+                            const isActive = pathname === item.href ||
+                                (item.href !== '/' && pathname.startsWith(item.href))
 
-                                // People 메뉴는 오른쪽 끝에 있어서 드롭다운을 왼쪽 정렬
-                                const isRightAligned = item.label === 'People'
-                                return (
-                                    <NavDropdown
-                                        key={item.href}
-                                        item={item}
-                                        isActive={isActive}
-                                        className={isActive ? navActiveColor : navColor}
-                                        alignRight={isRightAligned}
-                                    />
-                                )
-                            })}
-                        </nav>
-                    </LiquidGlass>
+                            // People 메뉴는 오른쪽 끝에 있어서 드롭다운을 왼쪽 정렬
+                            const isRightAligned = item.label === 'People'
+                            return (
+                                <NavDropdown
+                                    key={item.href}
+                                    item={item}
+                                    isActive={isActive}
+                                    className={isActive ? navActiveColor : navColor}
+                                    alignRight={isRightAligned}
+                                />
+                            )
+                        })}
+                    </nav>
 
                     {/* Mobile Menu Button */}
                     <button
