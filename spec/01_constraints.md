@@ -1,5 +1,3 @@
----
-
 # 01_constraints.md
 
 System Constraints & Foundational Principles (Static-First Web System)
