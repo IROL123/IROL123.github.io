@@ -155,20 +155,20 @@ export function CustomHeader() {
 
     return (
         <header
-            className={`top-0 z-[100] w-full transition-all duration-500 border-b
+            className={`left-0 right-0 top-0 z-[100] w-full transition-all duration-500 border-b
         ${isHome ? 'fixed' : 'sticky'}
         ${!isTransparent
                     ? 'bg-background/80 backdrop-blur-md border-border/50 py-2 shadow-sm'
-                    : 'bg-transparent border-transparent py-6'
+                    : 'bg-transparent border-transparent py-4'
                 }`}
         >
-            <div className="w-full max-w-[1920px] mx-auto px-8 md:px-16">
-                <div className="flex items-center justify-between h-20">
+            <div className="w-full max-w-[1920px] mx-auto px-4 md:px-6">
+                <div className="flex items-center justify-between h-16">
                     {/* Logo Section */}
-                    <Link href="/" className="flex items-center gap-4 group select-none">
+                    <Link href="/" className="flex items-center gap-2 group select-none">
                         <div className="relative">
                             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                            <div className="relative p-1">
+                            <div className="relative -translate-y-1">
                                 <Logo hasLink={false} forceWhite={isTransparent} />
                             </div>
                         </div>
