@@ -18,4 +18,7 @@ export default withNextra({
     unoptimized: true,
   },
   trailingSlash: true,
+  turbopack: {
+    root: process.cwd(),
+  },
 })
