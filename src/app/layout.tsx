@@ -4,6 +4,8 @@ import '@/styles/globals.css'
 import CustomFooter from "@/components/custom-footer";
 import CustomHeader from "@/components/custom-header";
 import { FloatingNav } from "@/components/floating-nav";
+import { PageTransition } from "@/components/page-transition";
+import { Providers } from "@/components/providers";
 import { Metadata } from "next";
 import { Layout } from "nextra-theme-blog";
 import { Inter } from 'next/font/google';
@@ -30,14 +32,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         >
             <Head backgroundColor={{ dark: '#15120d', light: '#faf5e9' }} />
             <body className="min-h-screen">
-                <Layout>
-                    <CustomHeader />
+                <Providers>
+                    <Layout>
+                        <CustomHeader />
 
-                    {children}
+                        <PageTransition>
+                            {children}
+                        </PageTransition>
 
-                    <CustomFooter />
-                </Layout>
-                <FloatingNav />
+                        <CustomFooter />
+                    </Layout>
+                    <FloatingNav />
+                </Providers>
             </body>
         </html>
     )

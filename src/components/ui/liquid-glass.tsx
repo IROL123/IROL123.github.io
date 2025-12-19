@@ -15,6 +15,8 @@ export interface LiquidGlassProps {
 	zIndex?: number;
 	className?: string;
 	children?: React.ReactNode;
+	/** Force mobile fallback mode (CSS-only) */
+	forceFallback?: boolean;
 }
 
 const LiquidGlass: React.FC<LiquidGlassProps> = ({
@@ -29,6 +31,7 @@ const LiquidGlass: React.FC<LiquidGlassProps> = ({
 	zIndex = 9999,
 	className,
 	children,
+	forceFallback = false,
 }) => {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const svgRef = useRef<SVGSVGElement>(null);
@@ -43,6 +46,20 @@ const LiquidGlass: React.FC<LiquidGlassProps> = ({
 	const [height, setHeight] = useState(200);
 	const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
 	const [isHovered, setIsHovered] = useState(false);
+	const [isMobile, setIsMobile] = useState(false);
+
+	// Detect mobile/touch devices and low-performance scenarios
+	useEffect(() => {
+		const checkMobile = () => {
+			const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+			const isSmallScreen = window.innerWidth < 768;
+			const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+			setIsMobile(isTouchDevice || isSmallScreen || prefersReducedMotion || forceFallback);
+		};
+		checkMobile();
+		window.addEventListener('resize', checkMobile);
+		return () => window.removeEventListener('resize', checkMobile);
+	}, [forceFallback]);
 
 	const canvasDPI = 1;
 
@@ -201,6 +218,30 @@ const LiquidGlass: React.FC<LiquidGlassProps> = ({
 	// Calculate elastic translation for fluid movement
 	const elasticTranslateX = mouseOffset.x * elasticity * 0.05;
 	const elasticTranslateY = mouseOffset.y * elasticity * 0.05;
+
+	// Mobile/fallback: Simple CSS-based glass effect
+	if (isMobile) {
+		return (
+			<div
+				className={className}
+				style={{
+					position: "relative",
+					borderRadius: `${borderRadius}px`,
+					boxShadow: `0 4px 8px rgba(0, 0, 0, ${shadowIntensity}), 0 -10px 25px inset rgba(0, 0, 0, 0.1)`,
+					backdropFilter: `blur(${Math.max(blur * 20, 12)}px) contrast(${contrast}) brightness(${brightness}) saturate(${saturation})`,
+					WebkitBackdropFilter: `blur(${Math.max(blur * 20, 12)}px) contrast(${contrast}) brightness(${brightness}) saturate(${saturation})`,
+					background: "rgba(255, 255, 255, 0.1)",
+					border: "1px solid rgba(255, 255, 255, 0.2)",
+					zIndex: zIndex,
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "center",
+				}}
+			>
+				{children}
+			</div>
+		);
+	}
 
 	return (
 		<>

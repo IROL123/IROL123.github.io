@@ -3,6 +3,35 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Pretendard Korean Font */
+@font-face {
+    font-family: 'Pretendard';
+    src: local('Pretendard Regular'), url('/fonts/Pretendard-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: local('Pretendard Medium'), url('/fonts/Pretendard-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: local('Pretendard SemiBold'), url('/fonts/Pretendard-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: local('Pretendard Bold'), url('/fonts/Pretendard-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-display: swap;
+}
+
 @layer utilities {
     .bg-polka {
         --dot-color: rgba(0, 50, 150, 0.03);
@@ -104,42 +133,51 @@
 }
 
 .dark {
-    --background: oklch(0.1 0.02 260);
-    /* Deep Navy Black */
-    --foreground: oklch(0.98 0 0);
+    --background: oklch(0.12 0.04 250);
+    /* Rich Dark Blue */
+    --foreground: oklch(0.95 0.01 250);
 
-    --card: oklch(0.13 0.03 260);
-    --card-foreground: oklch(0.98 0 0);
+    --card: oklch(0.15 0.05 250);
+    --card-foreground: oklch(0.95 0.01 250);
 
-    --popover: oklch(0.13 0.03 260);
-    --popover-foreground: oklch(0.98 0 0);
+    --popover: oklch(0.15 0.05 250);
+    --popover-foreground: oklch(0.95 0.01 250);
 
-    --primary: oklch(0.6 0.15 260);
-    /* Lighter Blue for Dark Mode */
+    --primary: oklch(0.65 0.18 250);
+    /* Brighter Blue for Dark Mode */
     --primary-foreground: oklch(1 0 0);
 
-    --secondary: oklch(0.18 0.04 260);
-    --secondary-foreground: oklch(0.98 0 0);
+    --secondary: oklch(0.20 0.05 250);
+    --secondary-foreground: oklch(0.92 0.01 250);
 
-    --muted: oklch(0.18 0.04 260);
-    --muted-foreground: oklch(0.7 0.03 260);
+    --muted: oklch(0.20 0.05 250);
+    --muted-foreground: oklch(0.70 0.03 250);
 
-    --accent: oklch(0.55 0.15 250);
+    --accent: oklch(0.60 0.18 240);
     --accent-foreground: oklch(1 0 0);
 
-    --destructive: oklch(0.5 0.2 20);
-    --border: oklch(0.2 0.04 260);
-    --input: oklch(0.2 0.04 260);
-    --ring: oklch(0.6 0.15 260);
+    --destructive: oklch(0.55 0.2 20);
+    --border: oklch(0.25 0.05 250);
+    --input: oklch(0.22 0.05 250);
+    --ring: oklch(0.65 0.18 250);
 }
 
 @layer base {
     * {
         @apply border-border outline-ring/50;
+        transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+            border-color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+            color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+            fill 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+            stroke 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+            box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+            opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     body {
         @apply bg-background text-foreground;
+        font-family: 'Pretendard', system-ui, -apple-system, sans-serif;
+        font-weight: 600;
     }
 
     .x\:container {

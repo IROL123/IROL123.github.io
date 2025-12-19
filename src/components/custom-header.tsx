@@ -8,15 +8,16 @@ import {
     IconChevronDown,
     IconHome,
     IconUsers,
-    IconArticle,
-    IconFolder,
     IconBell,
     IconMenu2,
     IconX,
-    IconBulb,
-    IconMicroscope
+    IconMicroscope,
+    IconLanguage
 } from '@tabler/icons-react'
 import Logo from '@/components/logo'
+import { useLanguage } from '@/lib/i18n'
+import { LiquidGlassThemeToggle } from '@/components/ui/liquid-glass-theme-toggle'
+import { useTheme } from 'next-themes'
 
 interface NavItem {
     href: string
@@ -25,36 +26,57 @@ interface NavItem {
     children?: { href: string; label: string; description?: string }[]
 }
 
-const NAV_ITEMS: NavItem[] = [
-    { href: '/', label: 'Home', icon: IconHome },
-    {
-        href: '/research',
-        label: 'Research',
-        icon: IconMicroscope,
-        children: [
-            { href: '/research', label: 'Overview', description: 'Our key research areas' },
-            { href: '/research/publications', label: 'Publications', description: 'Papers and journals' },
-            { href: '/research/conferences', label: 'Conferences', description: 'Academic presentations' },
-            { href: '/research/patents', label: 'Patents', description: 'Intellectual property' },
-            { href: '/research/projects', label: 'Projects', description: 'Research grants & tasks' },
-        ]
-    },
-    {
-        href: '/people',
-        label: 'People',
-        icon: IconUsers,
-        children: [
-            { href: '/people?tab=professor', label: 'Professor', description: 'Principal Investigator' },
-            { href: '/people?tab=members', label: 'Members', description: 'Current students & researchers' },
-            { href: '/people?tab=alumni', label: 'Alumni', description: 'Graduated members' },
-        ]
-    },
-    { href: '/notices', label: 'Notices', icon: IconBell },
-]
+function useNavItems(): NavItem[] {
+    const { t } = useLanguage()
+
+    return [
+        { href: '/', label: t.nav.home, icon: IconHome },
+        {
+            href: '/research',
+            label: t.nav.research,
+            icon: IconMicroscope,
+            children: [
+                { href: '/research', label: t.nav.researchOverview, description: t.nav.researchOverviewDesc },
+                { href: '/research/publications', label: t.nav.publications, description: t.nav.publicationsDesc },
+                { href: '/research/conferences', label: t.nav.conferences, description: t.nav.conferencesDesc },
+                { href: '/research/patents', label: t.nav.patents, description: t.nav.patentsDesc },
+                { href: '/research/projects', label: t.nav.projects, description: t.nav.projectsDesc },
+            ]
+        },
+        {
+            href: '/people',
+            label: t.nav.people,
+            icon: IconUsers,
+            children: [
+                { href: '/people?tab=professor', label: t.nav.professor, description: t.nav.professorDesc },
+                { href: '/people?tab=members', label: t.nav.members, description: t.nav.membersDesc },
+                { href: '/people?tab=alumni', label: t.nav.alumni, description: t.nav.alumniDesc },
+            ]
+        },
+        { href: '/notices', label: t.nav.notices, icon: IconBell },
+    ]
+}
+
+function LanguageToggle({ isTransparent }: { isTransparent: boolean }) {
+    const { language, toggleLanguage } = useLanguage()
+
+    return (
+        <button
+            onClick={toggleLanguage}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-300 border ${isTransparent
+                ? 'text-white/90 hover:text-white border-white/20 hover:bg-white/10'
+                : 'text-muted-foreground hover:text-foreground border-border/50 hover:bg-secondary'
+                }`}
+            title={language === 'en' ? 'Switch to Korean' : 'Switch to English'}
+        >
+            <IconLanguage className="w-4 h-4" />
+            <span className="uppercase font-bold">{language}</span>
+        </button>
+    )
+}
 
 function NavDropdown({ item, isActive, className, alignRight = false }: { item: NavItem; isActive: boolean; className?: string; alignRight?: boolean }) {
     const [isOpen, setIsOpen] = useState(false)
-    const pathname = usePathname()
 
     if (!item.children) {
         return (
@@ -135,6 +157,14 @@ export function CustomHeader() {
     const pathname = usePathname()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [scrolled, setScrolled] = useState(false)
+    const navItems = useNavItems()
+    const { t } = useLanguage()
+    const { resolvedTheme } = useTheme()
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     // Handle scroll effect
     useEffect(() => {
@@ -146,12 +176,17 @@ export function CustomHeader() {
     }, [])
     const isHome = pathname === '/'
     const isTransparent = isHome && !scrolled
+    const isDark = mounted && resolvedTheme === 'dark'
 
-    // Text colors based on state
-    const logoColor = isTransparent ? 'text-white' : 'text-foreground'
-    const subLogoColor = isTransparent ? 'text-white/80 group-hover:text-white' : 'text-muted-foreground group-hover:text-foreground'
-    const navColor = isTransparent ? 'text-white/80 hover:text-white' : 'text-muted-foreground hover:text-foreground'
-    const navActiveColor = isTransparent ? 'text-white' : 'text-foreground'
+    // Text colors based on state - dark text in dark mode when on Hero
+    const heroTextColor = isDark ? 'text-slate-800' : 'text-white'
+    const heroTextColorMuted = isDark ? 'text-slate-600 hover:text-slate-800' : 'text-white/80 hover:text-white'
+    const heroTextColorActive = isDark ? 'text-slate-900' : 'text-white'
+
+    const logoColor = isTransparent ? heroTextColor : 'text-foreground'
+    const subLogoColor = isTransparent ? (isDark ? 'text-slate-600 group-hover:text-slate-800' : 'text-white/80 group-hover:text-white') : 'text-muted-foreground group-hover:text-foreground'
+    const navColor = isTransparent ? heroTextColorMuted : 'text-muted-foreground hover:text-foreground'
+    const navActiveColor = isTransparent ? heroTextColorActive : 'text-foreground'
 
     return (
         <header
@@ -169,7 +204,7 @@ export function CustomHeader() {
                         <div className="relative">
                             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                             <div className="relative -translate-y-1">
-                                <Logo hasLink={false} forceWhite={isTransparent} />
+                                <Logo hasLink={false} forceWhite={isTransparent && !isDark} />
                             </div>
                         </div>
                         <div className="flex flex-col">
@@ -183,36 +218,44 @@ export function CustomHeader() {
                     </Link>
 
                     {/* Desktop Navigation - Glass Style */}
-                    <nav className="hidden lg:flex items-center gap-1 px-2 py-1.5 ml-auto rounded-full bg-white/10 dark:bg-white/5 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.12)]">
-                        {NAV_ITEMS.map((item) => {
-                            const isActive = pathname === item.href ||
-                                (item.href !== '/' && pathname.startsWith(item.href))
+                    <div className="hidden lg:flex items-center gap-3">
+                        <nav className="flex items-center gap-1 px-2 py-1.5 rounded-full bg-white/10 dark:bg-white/5 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.12)]">
+                            {navItems.map((item) => {
+                                const isActive = pathname === item.href ||
+                                    (item.href !== '/' && pathname.startsWith(item.href))
 
-                            // People 메뉴는 오른쪽 끝에 있어서 드롭다운을 왼쪽 정렬
-                            const isRightAligned = item.label === 'People'
-                            return (
-                                <NavDropdown
-                                    key={item.href}
-                                    item={item}
-                                    isActive={isActive}
-                                    className={isActive ? navActiveColor : navColor}
-                                    alignRight={isRightAligned}
-                                />
-                            )
-                        })}
-                    </nav>
+                                // People 메뉴는 오른쪽 끝에 있어서 드롭다운을 왼쪽 정렬
+                                const isRightAligned = item.href === '/people'
+                                return (
+                                    <NavDropdown
+                                        key={item.href}
+                                        item={item}
+                                        isActive={isActive}
+                                        className={isActive ? navActiveColor : navColor}
+                                        alignRight={isRightAligned}
+                                    />
+                                )
+                            })}
+                        </nav>
+                        <LiquidGlassThemeToggle isTransparent={isTransparent} size="sm" />
+                        <LanguageToggle isTransparent={isTransparent} />
+                    </div>
 
-                    {/* Mobile Menu Button */}
-                    <button
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        className="lg:hidden p-2 rounded-xl hover:bg-secondary transition-colors"
-                    >
-                        {mobileMenuOpen ? (
-                            <IconX className="w-6 h-6" />
-                        ) : (
-                            <IconMenu2 className="w-6 h-6" />
-                        )}
-                    </button>
+                    {/* Mobile Controls */}
+                    <div className="lg:hidden flex items-center gap-2">
+                        <LiquidGlassThemeToggle isTransparent={isTransparent} size="sm" />
+                        <LanguageToggle isTransparent={isTransparent} />
+                        <button
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            className="p-2 rounded-xl hover:bg-secondary transition-colors"
+                        >
+                            {mobileMenuOpen ? (
+                                <IconX className="w-6 h-6" />
+                            ) : (
+                                <IconMenu2 className="w-6 h-6" />
+                            )}
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -226,7 +269,7 @@ export function CustomHeader() {
                         className="lg:hidden bg-background border-b border-border/50 overflow-hidden"
                     >
                         <div className="max-w-[1400px] mx-auto px-6 py-6 space-y-2">
-                            {NAV_ITEMS.map((item) => {
+                            {navItems.map((item) => {
                                 const isActive = pathname === item.href ||
                                     (item.href !== '/' && pathname.startsWith(item.href))
 

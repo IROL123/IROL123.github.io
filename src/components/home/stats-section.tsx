@@ -3,6 +3,7 @@
 import { motion, useInView } from 'framer-motion'
 import { useRef, useEffect, useState } from 'react'
 import { IconArticle, IconCertificate, IconUsers, IconBulb } from '@tabler/icons-react'
+import { useLanguage } from '@/lib/i18n'
 
 interface StatItemProps {
     icon: React.ReactNode
@@ -78,11 +79,13 @@ function StatItem({ icon, value, suffix = '', label, delay = 0 }: StatItemProps)
 }
 
 export function StatsSection() {
+    const { t } = useLanguage()
+
     const stats = [
-        { icon: <IconArticle className="w-6 h-6" />, value: 50, suffix: '+', label: 'Publications' },
-        { icon: <IconCertificate className="w-6 h-6" />, value: 10, suffix: '+', label: 'Patents' },
-        { icon: <IconUsers className="w-6 h-6" />, value: 15, suffix: '+', label: 'Lab Members' },
-        { icon: <IconBulb className="w-6 h-6" />, value: 20, suffix: '+', label: 'Research Projects' },
+        { icon: <IconArticle className="w-6 h-6" />, value: 50, suffix: '+', label: t.stats.publications },
+        { icon: <IconCertificate className="w-6 h-6" />, value: 10, suffix: '+', label: t.stats.patents },
+        { icon: <IconUsers className="w-6 h-6" />, value: 15, suffix: '+', label: t.stats.labMembers },
+        { icon: <IconBulb className="w-6 h-6" />, value: 20, suffix: '+', label: t.stats.researchProjects },
     ]
 
     return (
@@ -96,10 +99,10 @@ export function StatsSection() {
                     className="text-center mb-12"
                 >
                     <h2 className="text-3xl font-black tracking-tight mb-4">
-                        Our Impact
+                        {t.stats.title}
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto">
-                        Years of research in robotics and AI have led to significant contributions in both academia and industry.
+                        {t.stats.subtitle}
                     </p>
                 </motion.div>
 
