@@ -17,6 +17,7 @@ import {
     IconMicroscope
 } from '@tabler/icons-react'
 import Logo from '@/components/logo'
+import LiquidGlass from '@/components/ui/liquid-glass'
 
 interface NavItem {
     href: string
@@ -52,7 +53,7 @@ const NAV_ITEMS: NavItem[] = [
     { href: '/notices', label: 'Notices', icon: IconBell },
 ]
 
-function NavDropdown({ item, isActive, className }: { item: NavItem; isActive: boolean; className?: string }) {
+function NavDropdown({ item, isActive, className, alignRight = false }: { item: NavItem; isActive: boolean; className?: string; alignRight?: boolean }) {
     const [isOpen, setIsOpen] = useState(false)
     const pathname = usePathname()
 
@@ -70,7 +71,7 @@ function NavDropdown({ item, isActive, className }: { item: NavItem; isActive: b
                 {isActive && (
                     <motion.div
                         layoutId="nav-pill"
-                        className="absolute inset-0 bg-secondary/80 rounded-full -z-10"
+                        className="absolute inset-0 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-full -z-10 border border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.15)]"
                         transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                     />
                 )}
@@ -104,7 +105,7 @@ function NavDropdown({ item, isActive, className }: { item: NavItem; isActive: b
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ type: "spring", bounce: 0, duration: 0.2 }}
-                        className="absolute top-full left-0 mt-2 p-2 min-w-[260px] rounded-2xl glass dark:bg-zinc-900/90 border border-border/50 shadow-2xl backdrop-blur-xl z-50 overflow-hidden"
+                        className={`absolute top-full mt-2 p-2 min-w-[260px] rounded-2xl glass dark:bg-zinc-900/90 border border-border/50 shadow-2xl backdrop-blur-xl z-50 overflow-hidden ${alignRight ? 'right-0' : 'left-0'}`}
                     >
                         <div className="flex flex-col gap-1">
                             {item.children.map((child) => (
@@ -182,19 +183,38 @@ export function CustomHeader() {
                         </div>
                     </Link>
 
-                    {/* Desktop Navigation */}
-                    <nav className="hidden lg:flex items-center gap-2">
-                        {NAV_ITEMS.map((item) => {
-                            const isActive = pathname === item.href ||
-                                (item.href !== '/' && pathname.startsWith(item.href))
+                    {/* Desktop Navigation - Liquid Glass Style */}
+                    <LiquidGlass
+                        borderRadius={999}
+                        blur={24}
+                        contrast={1.3}
+                        saturation={1.4}
+                        brightness={1.15}
+                        shadowIntensity={0.2}
+                        displacementScale={2.5}
+                        elasticity={0.5}
+                        zIndex={100}
+                        className="hidden lg:flex ml-auto"
+                    >
+                        <nav className="flex items-center gap-1 px-2 py-1.5">
+                            {NAV_ITEMS.map((item) => {
+                                const isActive = pathname === item.href ||
+                                    (item.href !== '/' && pathname.startsWith(item.href))
 
-                            return (
-                                <NavDropdown key={item.href} item={item} isActive={isActive}
-                                    className={isActive ? navActiveColor : navColor}
-                                />
-                            )
-                        })}
-                    </nav>
+                                // People 메뉴는 오른쪽 끝에 있어서 드롭다운을 왼쪽 정렬
+                                const isRightAligned = item.label === 'People'
+                                return (
+                                    <NavDropdown
+                                        key={item.href}
+                                        item={item}
+                                        isActive={isActive}
+                                        className={isActive ? navActiveColor : navColor}
+                                        alignRight={isRightAligned}
+                                    />
+                                )
+                            })}
+                        </nav>
+                    </LiquidGlass>
 
                     {/* Mobile Menu Button */}
                     <button
