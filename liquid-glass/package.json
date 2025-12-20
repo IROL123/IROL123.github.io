@@ -1,0 +1,37 @@
+{
+	"name": "liquidglass",
+	"version": "0.1.0",
+	"private": false,
+	"description": "A collection of liquid glass effect components for different frameworks",
+	"author": "Liquid Glass Team",
+	"license": "MIT",
+	"workspaces": [
+		"packages/*"
+	],
+	"scripts": {
+		"build": "yarn workspaces foreach -A run build",
+		"dev": "yarn workspace @liquid-glass/example-nextjs dev",
+		"clean": "yarn workspaces foreach -A run clean",
+		"lint": "yarn workspaces foreach -A run lint",
+		"changeset": "changeset",
+		"version-packages": "changeset version",
+		"release": "yarn build && changeset publish"
+	},
+	"devDependencies": {
+		"@changesets/cli": "^2.27.9",
+		"@biomejs/biome": "^2.0.0",
+		"typescript": "^5"
+	},
+	"keywords": [
+		"liquid-glass",
+		"glass-effect",
+		"react",
+		"vue",
+		"ui-components",
+		"backdrop-filter"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/borabiricik/liquid-glass.git"
+	}
+}
