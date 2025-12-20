@@ -73,8 +73,8 @@ function testPaperWorkflow() {
   try {
     const fileContent = fs.readFileSync(samplePaperPath, 'utf-8')
     if (
-      fileContent.includes('Learning Robot Manipulation') &&
-      fileContent.includes('ICRA')
+      fileContent.includes('Sample Paper for Testing') &&
+      fileContent.includes('Test Conference')
     ) {
       pass('WF_SMK_001', 'Sample paper content is valid and loadable')
     } else {
