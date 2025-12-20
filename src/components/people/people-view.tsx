@@ -17,23 +17,29 @@ type Tab = 'professor' | 'members' | 'alumni'
 export function PeopleView({ people }: PeopleViewProps) {
     const searchParams = useSearchParams()
     const router = useRouter()
-
-    // Read initial tab from URL, default to 'professor'
-    const tabParam = searchParams.get('tab') as Tab | null
-    const initialTab: Tab = tabParam && ['professor', 'members', 'alumni'].includes(tabParam)
-        ? tabParam
-        : 'professor'
-
-    const [activeTab, setActiveTab] = useState<Tab>(initialTab)
     const { t } = useLanguage()
+
+    // Start with default tab, sync with URL after mount
+    const [activeTab, setActiveTab] = useState<Tab>('professor')
+    const [mounted, setMounted] = useState(false)
+
+    // Only read URL params after component mounts (client-side)
+    useEffect(() => {
+        setMounted(true)
+        const urlTab = searchParams?.get('tab') as Tab | null
+        if (urlTab && ['professor', 'members', 'alumni'].includes(urlTab)) {
+            setActiveTab(urlTab)
+        }
+    }, [])
 
     // Sync state with URL changes (e.g., browser back/forward)
     useEffect(() => {
-        const urlTab = searchParams.get('tab') as Tab | null
+        if (!mounted) return
+        const urlTab = searchParams?.get('tab') as Tab | null
         if (urlTab && ['professor', 'members', 'alumni'].includes(urlTab) && urlTab !== activeTab) {
             setActiveTab(urlTab)
         }
-    }, [searchParams, activeTab])
+    }, [searchParams, mounted])
 
     // Handle tab change: update URL
     const handleTabChange = (tab: Tab) => {
@@ -187,4 +193,3 @@ function MembersList({ people, roleTranslations }: { people: PersonEntry[]; role
         </div>
     )
 }
-

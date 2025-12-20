@@ -18,21 +18,27 @@ export function NoticesView({ notices }: NoticesViewProps) {
     const router = useRouter()
     const { t } = useLanguage()
 
-    // Read initial tab from URL, default to 'news'
-    const tabParam = searchParams.get('tab') as Tab | null
-    const initialTab: Tab = tabParam && ['news', 'announcement'].includes(tabParam)
-        ? tabParam
-        : 'news'
+    // Start with default tab, sync with URL after mount
+    const [activeTab, setActiveTab] = useState<Tab>('news')
+    const [mounted, setMounted] = useState(false)
 
-    const [activeTab, setActiveTab] = useState<Tab>(initialTab)
+    // Only read URL params after component mounts (client-side)
+    useEffect(() => {
+        setMounted(true)
+        const urlTab = searchParams?.get('tab') as Tab | null
+        if (urlTab && ['news', 'announcement'].includes(urlTab)) {
+            setActiveTab(urlTab)
+        }
+    }, [])
 
     // Sync state with URL changes (e.g., browser back/forward)
     useEffect(() => {
-        const urlTab = searchParams.get('tab') as Tab | null
+        if (!mounted) return
+        const urlTab = searchParams?.get('tab') as Tab | null
         if (urlTab && ['news', 'announcement'].includes(urlTab) && urlTab !== activeTab) {
             setActiveTab(urlTab)
         }
-    }, [searchParams, activeTab])
+    }, [searchParams, mounted])
 
     // Handle tab change: update URL
     const handleTabChange = (tab: Tab) => {
