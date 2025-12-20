@@ -17,6 +17,7 @@ import {
 import Logo from '@/components/logo'
 import { useLanguage } from '@/lib/i18n'
 import { LiquidGlassThemeToggle } from '@/components/ui/liquid-glass-theme-toggle'
+import { useThemeTransition } from '@/components/theme-transition-provider'
 import { useTheme } from 'next-themes'
 
 interface NavItem {
@@ -58,7 +59,8 @@ function useNavItems(): NavItem[] {
 }
 
 function LanguageToggle({ isTransparent }: { isTransparent: boolean }) {
-    const { language, toggleLanguage } = useLanguage()
+    const { language } = useLanguage()
+    const { toggleLanguage } = useThemeTransition()
 
     return (
         <button

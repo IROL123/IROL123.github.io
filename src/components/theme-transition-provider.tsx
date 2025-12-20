@@ -2,11 +2,13 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { useTheme } from 'next-themes'
+import { useLanguage } from '@/lib/i18n'
 import { motion, AnimatePresence } from 'framer-motion'
-import { IconLoader2 } from '@tabler/icons-react'
+import { IconLoader2, IconLanguage, IconPalette } from '@tabler/icons-react'
 
 interface ThemeTransitionContextType {
     toggleTheme: () => void
+    toggleLanguage: () => void
     isTransitioning: boolean
 }
 
@@ -22,40 +24,68 @@ export function useThemeTransition() {
 
 export function ThemeTransitionProvider({ children }: { children: React.ReactNode }) {
     const { resolvedTheme, setTheme } = useTheme()
+    const { toggleLanguage: originalToggleLanguage } = useLanguage()
+
     const [isTransitioning, setIsTransitioning] = useState(false)
+    const [transitionType, setTransitionType] = useState<'theme' | 'language'>('theme')
     const [targetTheme, setTargetTheme] = useState<string | null>(null)
+    const [pendingAction, setPendingAction] = useState<(() => void) | null>(null)
 
     const toggleTheme = () => {
         if (isTransitioning) return
         const nextTheme = resolvedTheme === 'dark' ? 'light' : 'dark'
         setTargetTheme(nextTheme)
+        setTransitionType('theme')
+
+        // Define the action to take
+        setPendingAction(() => () => setTheme(nextTheme))
+
         setIsTransitioning(true)
     }
 
-    // Effect to handle the actual theme switch timing
+    const toggleLanguage = () => {
+        if (isTransitioning) return
+        // We don't change targetTheme for language switch, keep current
+        setTargetTheme(resolvedTheme || 'light')
+        setTransitionType('language')
+
+        // Define action
+        setPendingAction(() => () => originalToggleLanguage())
+
+        setIsTransitioning(true)
+    }
+
+    // Effect to handle the actual switch timing
     useEffect(() => {
-        if (isTransitioning && targetTheme) {
+        if (isTransitioning && pendingAction) {
             // Wait for entry animation to complete (approx 500ms)
             const timer = setTimeout(() => {
-                setTheme(targetTheme)
-                // Wait a bit more for the theme to apply before exiting overlay
+                pendingAction()
+
+                // Wait a bit more for the change to apply before exiting overlay
                 setTimeout(() => {
                     setIsTransitioning(false)
                     setTargetTheme(null)
+                    setPendingAction(null)
                 }, 100)
             }, 600)
 
             return () => clearTimeout(timer)
         }
-    }, [isTransitioning, targetTheme, setTheme])
+    }, [isTransitioning, pendingAction])
+
+    // Determine visual props based on type
+    const isDarkTarget = targetTheme === 'dark'
+    const loadingText = transitionType === 'theme' ? 'Switching Theme' : 'Switching Language'
+    const LoadingIcon = transitionType === 'theme' ? IconPalette : IconLanguage
 
     return (
-        <ThemeTransitionContext.Provider value={{ toggleTheme, isTransitioning }}>
+        <ThemeTransitionContext.Provider value={{ toggleTheme, toggleLanguage, isTransitioning }}>
             {children}
             <AnimatePresence>
                 {isTransitioning && (
                     <motion.div
-                        key="theme-transition-overlay"
+                        key="transition-overlay"
                         initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
                         animate={{ opacity: 1, backdropFilter: "blur(20px)" }}
                         exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
@@ -65,8 +95,8 @@ export function ThemeTransitionProvider({ children }: { children: React.ReactNod
                         {/* Background with slight tint based on target theme */}
                         <motion.div
                             className="absolute inset-0"
-                            initial={{ backgroundColor: targetTheme === 'dark' ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)' }}
-                            animate={{ backgroundColor: targetTheme === 'dark' ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)' }}
+                            initial={{ backgroundColor: isDarkTarget ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)' }}
+                            animate={{ backgroundColor: isDarkTarget ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)' }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.5 }}
                         />
@@ -77,7 +107,7 @@ export function ThemeTransitionProvider({ children }: { children: React.ReactNod
                             {[1, 2, 3].map((i) => (
                                 <motion.div
                                     key={i}
-                                    className={`absolute rounded-full border-2 ${targetTheme === 'dark' ? 'border-primary/20' : 'border-primary/20'
+                                    className={`absolute rounded-full border-2 ${isDarkTarget ? 'border-primary/20' : 'border-primary/20'
                                         }`}
                                     initial={{ width: 100, height: 100, opacity: 0, scale: 0.5 }}
                                     animate={{
@@ -105,18 +135,23 @@ export function ThemeTransitionProvider({ children }: { children: React.ReactNod
                                 className="relative z-10 flex flex-col items-center gap-6"
                             >
                                 <div className="relative w-32 h-32 flex items-center justify-center">
-                                    <div className={`absolute inset-0 rounded-full blur-2xl opacity-60 ${targetTheme === 'dark' ? 'bg-indigo-500/50' : 'bg-blue-400/50'
+                                    <div className={`absolute inset-0 rounded-full blur-2xl opacity-60 ${isDarkTarget ? 'bg-indigo-500/50' : 'bg-blue-400/50'
                                         }`} />
                                     <div className="relative z-10 w-24 h-24 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl flex items-center justify-center">
-                                        <IconLoader2
-                                            className={`w-12 h-12 animate-spin ${targetTheme === 'dark' ? 'text-white' : 'text-primary'
+                                        <LoadingIcon
+                                            className={`w-12 h-12 ${isDarkTarget ? 'text-white' : 'text-primary'
                                                 }`}
+                                            stroke={1.5}
                                         />
+                                    </div>
+                                    {/* Small spinner overlay */}
+                                    <div className="absolute bottom-[-10px]">
+                                        <IconLoader2 className={`w-6 h-6 animate-spin ${isDarkTarget ? 'text-white/70' : 'text-primary/70'}`} />
                                     </div>
                                 </div>
 
                                 <motion.span
-                                    className={`text-2xl font-bold tracking-widest uppercase bg-clip-text text-transparent bg-gradient-to-r ${targetTheme === 'dark'
+                                    className={`text-2xl font-bold tracking-widest uppercase bg-clip-text text-transparent bg-gradient-to-r ${isDarkTarget
                                             ? 'from-white via-blue-200 to-white'
                                             : 'from-blue-600 via-indigo-600 to-blue-600'
                                         }`}
@@ -124,7 +159,7 @@ export function ThemeTransitionProvider({ children }: { children: React.ReactNod
                                     transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
                                     style={{ backgroundSize: "200%" }}
                                 >
-                                    Switching Theme
+                                    {loadingText}
                                 </motion.span>
                             </motion.div>
                         </div>

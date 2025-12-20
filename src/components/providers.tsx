@@ -7,11 +7,11 @@ import { ThemeTransitionProvider } from '@/components/theme-transition-provider'
 export function Providers({ children }: { children: React.ReactNode }) {
     return (
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <ThemeTransitionProvider>
-                <LanguageProvider>
+            <LanguageProvider>
+                <ThemeTransitionProvider>
                     {children}
-                </LanguageProvider>
-            </ThemeTransitionProvider>
+                </ThemeTransitionProvider>
+            </LanguageProvider>
         </ThemeProvider>
     )
 }

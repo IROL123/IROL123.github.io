@@ -1,0 +1,5 @@
+1:"$Sreact.fragment"
+2:I[41050,["/_next/static/chunks/ec39348990c3a291.js","/_next/static/chunks/e612c3809afb78cf.js"],"OutletBoundary"]
+3:"$Sreact.suspense"
+0:{"buildId":"KCiZxX8I0_s8ATtrbtcPh","rsc":["$","$1","c",{"children":[[false,["$","p",null,{"children":"This paper presents a Structural Stability Assessment (SSA) based method for efficient order picking in box-stacked storage. A CNN model evaluates the stability of the remaining structure if a target box is removed directly. Achieving 97% accuracy with real data, this method allows for direct picking without dismantling upper layers when safe, enhancing both efficiency and safety in logistics automation."}]],[["$","script","script-0",{"src":"/_next/static/chunks/a99412a3d4e4064b.js","async":true}]],["$","$L2",null,{"children":["$","$3",null,{"name":"Next.MetadataOutlet","children":"$@4"}]}]]}],"loading":null,"isPartial":false}
+4:null

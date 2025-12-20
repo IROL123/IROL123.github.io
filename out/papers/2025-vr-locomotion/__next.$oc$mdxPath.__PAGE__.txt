@@ -1,0 +1,5 @@
+1:"$Sreact.fragment"
+2:I[41050,["/_next/static/chunks/ec39348990c3a291.js","/_next/static/chunks/e612c3809afb78cf.js"],"OutletBoundary"]
+3:"$Sreact.suspense"
+0:{"buildId":"KCiZxX8I0_s8ATtrbtcPh","rsc":["$","$1","c",{"children":[[false,["$","p",null,{"children":"We propose an intuitive VR viewpoint control technique using multi-mode hand gestures for telemanipulation in tight logistic environments. By switching locomotion modes via hand gestures, operators can precisely control their viewpoint, reducing motion sickness and fatigue. Experiments confirm that this multi-mode approach enables smooth robot control and better spatial understanding in complex environments."}]],[["$","script","script-0",{"src":"/_next/static/chunks/a99412a3d4e4064b.js","async":true}]],["$","$L2",null,{"children":["$","$3",null,{"name":"Next.MetadataOutlet","children":"$@4"}]}]]}],"loading":null,"isPartial":false}
+4:null

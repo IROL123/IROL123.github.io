@@ -1,0 +1,5 @@
+1:"$Sreact.fragment"
+2:I[41050,["/_next/static/chunks/ec39348990c3a291.js","/_next/static/chunks/e612c3809afb78cf.js"],"OutletBoundary"]
+3:"$Sreact.suspense"
+0:{"buildId":"KCiZxX8I0_s8ATtrbtcPh","rsc":["$","$1","c",{"children":[[false,[["$","h1",null,{"className":"custom-h1","children":"Study on improving speed of remote control and monitoring system for integrated actuator for extreme environments"}],"\n",["$","p",null,{"children":[["$","strong",null,{"children":"Korean Title:"}]," 극한 환경용 일체형 구동기의 원격 제어 및 모니터링 시스템의 속도 향상에 관한 연구"]}],"\n",["$","p",null,{"children":["Published in ",["$","em",null,{"children":"KSME Conference"}],", 2015."]}],"\n"]],[["$","script","script-0",{"src":"/_next/static/chunks/a99412a3d4e4064b.js","async":true}]],["$","$L2",null,{"children":["$","$3",null,{"name":"Next.MetadataOutlet","children":"$@4"}]}]]}],"loading":null,"isPartial":false}
+4:null

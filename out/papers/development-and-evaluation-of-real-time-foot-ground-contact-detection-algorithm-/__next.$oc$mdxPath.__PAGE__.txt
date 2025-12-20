@@ -1,0 +1,5 @@
+1:"$Sreact.fragment"
+2:I[41050,["/_next/static/chunks/ec39348990c3a291.js","/_next/static/chunks/e612c3809afb78cf.js"],"OutletBoundary"]
+3:"$Sreact.suspense"
+0:{"buildId":"KCiZxX8I0_s8ATtrbtcPh","rsc":["$","$1","c",{"children":[[false,[["$","h1",null,{"className":"custom-h1","children":"Development and evaluation of real-time foot-ground contact detection algorithm considering walking speed"}],"\n",["$","p",null,{"children":[["$","strong",null,{"children":"Korean Title:"}]," 보행속도 변화를 고려한 관성센서 기반의 실시간 발-지면 접촉검출 알고리즘 개발 및 성능평가"]}],"\n",["$","p",null,{"children":["Published in ",["$","em",null,{"children":"KSPE Conference"}],", 2015."]}],"\n"]],[["$","script","script-0",{"src":"/_next/static/chunks/a99412a3d4e4064b.js","async":true}]],["$","$L2",null,{"children":["$","$3",null,{"name":"Next.MetadataOutlet","children":"$@4"}]}]]}],"loading":null,"isPartial":false}
+4:null
