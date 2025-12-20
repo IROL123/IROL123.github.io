@@ -1,5 +1,6 @@
 'use client'
 
+import { useThemeTransition } from '@/components/theme-transition-provider'
 import { useTheme } from 'next-themes'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { IconSun, IconMoon } from '@tabler/icons-react'
@@ -11,7 +12,8 @@ interface LiquidGlassThemeToggleProps {
 }
 
 export function LiquidGlassThemeToggle({ isTransparent = false, size = 'md' }: LiquidGlassThemeToggleProps) {
-    const { theme, setTheme, resolvedTheme } = useTheme()
+    const { resolvedTheme } = useTheme()
+    const { toggleTheme } = useThemeTransition()
     const [mounted, setMounted] = useState(false)
     const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 })
     const [isHovered, setIsHovered] = useState(false)
@@ -36,10 +38,6 @@ export function LiquidGlassThemeToggle({ isTransparent = false, size = 'md' }: L
         setMouseOffset({ x: 0, y: 0 })
         setIsHovered(false)
     }, [])
-
-    const toggleTheme = () => {
-        setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
-    }
 
     const sizeClasses = {
         sm: 'w-9 h-9',
