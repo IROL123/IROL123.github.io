@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PersonEntry } from '@/lib/indexes/people'
 import { PersonCard } from '@/components/entities/person-card'
@@ -14,8 +15,31 @@ interface PeopleViewProps {
 type Tab = 'professor' | 'members' | 'alumni'
 
 export function PeopleView({ people }: PeopleViewProps) {
-    const [activeTab, setActiveTab] = useState<Tab>('professor')
+    const searchParams = useSearchParams()
+    const router = useRouter()
+
+    // Read initial tab from URL, default to 'professor'
+    const tabParam = searchParams.get('tab') as Tab | null
+    const initialTab: Tab = tabParam && ['professor', 'members', 'alumni'].includes(tabParam)
+        ? tabParam
+        : 'professor'
+
+    const [activeTab, setActiveTab] = useState<Tab>(initialTab)
     const { t } = useLanguage()
+
+    // Sync state with URL changes (e.g., browser back/forward)
+    useEffect(() => {
+        const urlTab = searchParams.get('tab') as Tab | null
+        if (urlTab && ['professor', 'members', 'alumni'].includes(urlTab) && urlTab !== activeTab) {
+            setActiveTab(urlTab)
+        }
+    }, [searchParams, activeTab])
+
+    // Handle tab change: update URL
+    const handleTabChange = (tab: Tab) => {
+        setActiveTab(tab)
+        router.push(`/people?tab=${tab}`, { scroll: false })
+    }
 
     const TABS: { key: Tab; label: string }[] = [
         { key: 'professor', label: t.people.tabs.professor },
@@ -45,7 +69,7 @@ export function PeopleView({ people }: PeopleViewProps) {
                 {TABS.map((tab) => (
                     <button
                         key={tab.key}
-                        onClick={() => setActiveTab(tab.key)}
+                        onClick={() => handleTabChange(tab.key)}
                         className={`relative px-8 py-2.5 text-sm font-bold transition-all rounded-xl cursor-pointer
               ${activeTab === tab.key
                                 ? 'text-primary'

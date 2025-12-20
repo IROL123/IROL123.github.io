@@ -110,6 +110,12 @@ export interface Translations {
     notices: {
         title: string
         empty: string
+        tabs: {
+            news: string
+            newsDesc: string
+            announcement: string
+            announcementDesc: string
+        }
         categories: {
             news: string
             seminar: string
@@ -228,6 +234,12 @@ export const translations: Record<Language, Translations> = {
         notices: {
             title: 'Notices',
             empty: 'No notices yet.',
+            tabs: {
+                news: 'News',
+                newsDesc: 'Lab news and media coverage',
+                announcement: 'Announcements',
+                announcementDesc: 'Official lab announcements',
+            },
             categories: {
                 news: 'News',
                 seminar: 'Seminar',
@@ -343,6 +355,12 @@ export const translations: Record<Language, Translations> = {
         notices: {
             title: '공지사항',
             empty: '아직 공지사항이 없습니다.',
+            tabs: {
+                news: '소식',
+                newsDesc: '연구실 관련 뉴스',
+                announcement: '공지',
+                announcementDesc: '공식 공지사항',
+            },
             categories: {
                 news: '뉴스',
                 seminar: '세미나',

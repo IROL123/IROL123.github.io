@@ -54,7 +54,15 @@ function useNavItems(): NavItem[] {
                 { href: '/people?tab=alumni', label: t.nav.alumni, description: t.nav.alumniDesc },
             ]
         },
-        { href: '/notices', label: t.nav.notices, icon: IconBell },
+        {
+            href: '/notices',
+            label: t.nav.notices,
+            icon: IconBell,
+            children: [
+                { href: '/notices?tab=news', label: t.notices.tabs.news, description: t.notices.tabs.newsDesc },
+                { href: '/notices?tab=announcement', label: t.notices.tabs.announcement, description: t.notices.tabs.announcementDesc },
+            ]
+        },
     ]
 }
 
