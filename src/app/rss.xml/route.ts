@@ -1,23 +1,25 @@
-import {getPosts} from "@/lib/get-posts";
+import { getActiveNotices } from "@/lib/indexes/notices";
 
 export const dynamic = "force-static";
 
 const CONFIG = {
-    title: 'My Blog',
-    siteUrl: 'https://your-domain.com',
-    description: 'Latest blog posts',
+    title: 'IROL - Intelligent Robotics Lab',
+    siteUrl: 'https://irol123.github.io',
+    description: 'Latest news and announcements from IROL',
     lang: 'en-us'
 }
 
 export async function GET() {
-    const allPosts = await getPosts()
-    const posts = allPosts
+    const allNotices = getActiveNotices()
+    const items = allNotices
+        .filter(notice => notice.type === 'news')
+        .slice(0, 20)
         .map(
-            post => `    <item>
-        <title>${post.title}</title>
-        <description>${post.frontMatter.description}</description>
-        <link>${CONFIG.siteUrl}${post.route}</link>
-        <pubDate>${new Date(post.frontMatter.date).toUTCString()}</pubDate>
+            notice => `    <item>
+        <title>${notice.title}</title>
+        <description>${notice.content.substring(0, 200)}...</description>
+        <link>${CONFIG.siteUrl}/notices?tab=news</link>
+        <pubDate>${new Date(notice.date).toUTCString()}</pubDate>
     </item>`
         )
         .join('\n')
@@ -28,7 +30,7 @@ export async function GET() {
     <link>${CONFIG.siteUrl}</link>
     <description>${CONFIG.description}</description>
     <language>${CONFIG.lang}</language>
-${posts}
+${items}
   </channel>
 </rss>`
 
